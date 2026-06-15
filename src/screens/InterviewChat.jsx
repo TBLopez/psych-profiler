@@ -74,10 +74,10 @@ export default function InterviewChat() {
       onMouseLeave={cursorGlow.handleMouseLeave}
     >
       {/* Header */}
-      <header className="flex items-center justify-between px-3 sm:px-5 md:px-6 py-3 border-b border-border-light bg-surface shrink-0 min-h-[52px] gap-2">
-        <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-ink min-w-0">
+      <header className="flex items-center justify-between px-4 py-2.5 border-b border-border-light bg-surface shrink-0 gap-2">
+        <div className="flex items-center gap-2 text-sm font-medium text-ink min-w-0">
           <motion.span
-            className="w-2 h-2 rounded-full bg-accent-primary opacity-70 shrink-0"
+            className="w-1.5 h-1.5 rounded-full bg-accent-primary shrink-0"
             animate={{ opacity: isProcessing ? [0.4, 1, 0.4] : 0.7 }}
             transition={{ duration: 2, repeat: isProcessing ? Infinity : 0 }}
           />
@@ -89,7 +89,7 @@ export default function InterviewChat() {
       {/* Chat */}
       <div
         ref={chatRef}
-        className="flex-1 overflow-y-auto px-4 sm:px-5 md:px-6 py-4"
+        className="flex-1 overflow-y-auto px-4 py-3"
         role="log"
         aria-live="polite"
         aria-label="Interview conversation"

@@ -34,7 +34,7 @@ export default function PasswordGate() {
   }
 
   return (
-    <div className="min-h-screen min-h-dvh flex items-center justify-center p-4 sm:p-6 bg-canvas">
+    <div className="h-dvh h-screen flex items-center justify-center p-5 bg-canvas">
       <motion.div
         className="max-w-[380px] w-full text-center"
         initial={reduced ? {} : { opacity: 0, scale: 0.92 }}
@@ -66,8 +66,8 @@ export default function PasswordGate() {
             placeholder="Access code"
             autoFocus
             autoComplete="off"
-            className={`w-full px-5 py-3.5 bg-white border rounded-2xl text-[15px] text-ink text-center tracking-[3px] outline-none transition-all
-              ${error ? 'border-danger ring-2 ring-danger/20' : 'border-border focus:border-accent-primary focus:ring-2 focus:ring-accent-glow-primary'}`}
+            className={`w-full px-4 py-3 bg-surface-raised rounded-xl text-[15px] text-ink text-center tracking-[4px] outline-none transition-colors
+              ${error ? 'ring-2 ring-danger/30' : 'focus:ring-2 focus:ring-accent-primary/20'}`}
             aria-label="Access code"
             aria-invalid={!!error}
             aria-describedby={error ? 'gate-error' : undefined}

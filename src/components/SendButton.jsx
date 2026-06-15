@@ -9,27 +9,17 @@ export default function SendButton({ disabled, status, onClick }) {
     <motion.button
       onClick={onClick}
       disabled={disabled}
-      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
-      style={{ background: isComplete ? 'linear-gradient(135deg, #059669, #10B981)' : 'linear-gradient(135deg, #4F46E5, #6366F1)' }}
+      className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 disabled:opacity-30 disabled:cursor-not-allowed bg-accent-primary text-white"
       whileTap={{ scale: 0.92 }}
-      whileHover={{ scale: 1.05 }}
       aria-label={isProcessing ? 'Sending...' : isComplete ? 'Sent' : 'Send message'}
     >
-      <motion.span
-        key={status}
-        initial={{ opacity: 0, scale: 0.5 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-        className="text-white flex items-center justify-center"
-      >
-        {isProcessing ? (
-          <Loader2 size={16} className="animate-spin" />
-        ) : isComplete ? (
-          <Check size={16} />
-        ) : (
-          <ArrowUp size={16} />
-        )}
-      </motion.span>
+      {isProcessing ? (
+        <Loader2 size={14} className="animate-spin" />
+      ) : isComplete ? (
+        <Check size={14} />
+      ) : (
+        <ArrowUp size={14} />
+      )}
     </motion.button>
   );
 }
