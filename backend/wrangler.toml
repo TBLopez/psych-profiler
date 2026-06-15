@@ -1,0 +1,9 @@
+name = "psych-profiler"
+main = "worker.js"
+compatibility_date = "2024-12-01"
+
+[vars]
+DEEPSEEK_MODEL = "deepseek-reasoner"
+
+[env.production]
+DEEPSEEK_MODEL = "deepseek-reasoner"

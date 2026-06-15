@@ -1,0 +1,13 @@
+{
+  "name": "psych-profiler-backend",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker backend for Psychological Profiler",
+  "main": "worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "secrets": "wrangler secret put PASSWORD && wrangler secret put DEEPSEEK_KEY"
+  },
+  "dependencies": {},
+  "devDependencies": { "wrangler": "^3.0.0" }
+}
