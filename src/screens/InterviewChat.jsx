@@ -13,7 +13,7 @@ import SparkleBurst from '../components/SparkleBurst';
 
 export default function InterviewChat() {
   const { messages, phase, questionCount, status, error } = useInterviewState();
-  const { startInterview, sendMessage, endInterview } = useInterview();
+  const { startInterview, sendMessage, endInterview, retry } = useInterview();
   const [inputValue, setInputValue] = useState('');
   const [prevPhase, setPrevPhase] = useState(phase);
   const [showSparkles, setShowSparkles] = useState(false);
@@ -108,7 +108,15 @@ export default function InterviewChat() {
         {isProcessing && <TypingIndicator />}
 
         {error && (
-          <StatusMessage type="error">{error}</StatusMessage>
+          <div className="flex flex-col gap-2">
+            <StatusMessage type="error">{error}</StatusMessage>
+            <button
+              onClick={retry}
+              className="text-xs text-accent-primary hover:text-accent-deep bg-accent-primary/5 hover:bg-accent-primary/10 border border-accent-primary/20 rounded-lg px-3 py-1.5 transition-colors self-start cursor-pointer"
+            >
+              Retry
+            </button>
+          </div>
         )}
       </div>
 

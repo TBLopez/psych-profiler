@@ -17,7 +17,8 @@ export function useInterview() {
       const content = result.content;
       dispatch({ type: 'ADD_MESSAGE', role: 'assistant', content });
     } catch (e) {
-      dispatch({ type: 'SET_ERROR', error: e.message });
+      const msg = e.message || 'Failed to connect';
+      dispatch({ type: 'SET_ERROR', error: msg });
     } finally {
       dispatch({ type: 'SET_STATUS', status: 'idle' });
     }
@@ -83,6 +84,13 @@ export function useInterview() {
     }
   }, [messages, doGenerateReport, dispatch]);
 
+  const retry = useCallback(() => {
+    dispatch({ type: 'SET_ERROR', error: null });
+    if (messages.length === 0) {
+      startInterview();
+    }
+  }, [messages.length, startInterview, dispatch]);
+
   const reset = useCallback(() => {
     dispatch({ type: 'RESET' });
   }, [dispatch]);
@@ -92,6 +100,7 @@ export function useInterview() {
     sendMessage,
     endInterview,
     generateReport: generateReportRequest,
+    retry,
     reset,
     status,
   };
