@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Psychological Profile Interview</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0f0f11;
+    --bg-surface: #18181b;
+    --bg-elevated: #1f1f23;
+    --bg-hover: #27272a;
+    --border: #27272a;
+    --border-light: #2f2f33;
+    --text: #e8e8ea;
+    --text-secondary: #a1a1aa;
+    --text-muted: #63636e;
+    --accent: #6b8cff;
+    --accent-glow: rgba(107, 140, 255, 0.15);
+    --accent-soft: rgba(107, 140, 255, 0.08);
+    --user-bubble: #1e293b;
+    --user-border: rgba(107, 140, 255, 0.15);
+    --danger: #ef4444;
+    --success: #22c55e;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 820px;
+    margin: 0 auto;
+    width: 100%;
+    position: relative;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    flex-shrink: 0;
+    min-height: 56px;
+  }
+  .header .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .header .brand-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); opacity: 0.7; }
+  .header .phase-badge { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
+  .header .phase-badge .phase { color: var(--accent); font-weight: 500; }
+
+  /* PASSWORD GATE */
+  .gate-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .gate-overlay.visible { display: flex; }
+  .gate-box {
+    max-width: 380px;
+    width: 90%;
+    padding: 32px;
+    text-align: center;
+  }
+  .gate-box h1 { font-size: 16px; font-weight: 500; margin-bottom: 6px; letter-spacing: -0.3px; }
+  .gate-box p { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+  .gate-box input {
+    width: 100%; padding: 10px 14px; background: var(--bg-elevated);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    color: var(--text); font-size: 14px; font-family: inherit;
+    outline: none; transition: border 0.2s; text-align: center;
+  }
+  .gate-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .gate-box .gate-error { font-size: 12px; color: var(--danger); margin-top: 10px; display: none; }
+  .gate-box .gate-error.visible { display: block; }
+  .gate-box .submit-btn {
+    width: 100%; margin-top: 12px; padding: 10px;
+    background: var(--accent); color: #fff; border: none;
+    border-radius: var(--radius-sm); font-size: 14px; font-weight: 500;
+    font-family: inherit; cursor: pointer; transition: opacity 0.2s;
+  }
+  .gate-box .submit-btn:hover { opacity: 0.9; }
+  .gate-box .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* CHAT */
+  .chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 20px 8px;
+    scroll-behavior: smooth;
+  }
+  .chat::-webkit-scrollbar { width: 4px; }
+  .chat::-webkit-scrollbar-track { background: transparent; }
+  .chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .msg { margin-bottom: 16px; animation: msgIn 0.25s ease-out; max-width: 100%; }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .msg .row { display: flex; gap: 10px; align-items: flex-start; }
+  .msg .avatar {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 500; margin-top: 2px;
+  }
+  .msg.interviewer .avatar { background: var(--accent-soft); color: var(--accent); border: 1px solid rgba(107, 140, 255, 0.15); }
+  .msg.you .avatar { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border); }
+  .msg.system .avatar { background: rgba(200, 160, 96, 0.1); color: #c8a060; border: 1px solid rgba(200, 160, 96, 0.15); }
+
+  .msg .body { flex: 1; font-size: 14px; line-height: 1.65; color: var(--text-secondary); min-width: 0; }
+  .msg.you .body {
+    background: var(--user-bubble); border: 1px solid var(--user-border);
+    border-radius: var(--radius-sm); padding: 8px 14px;
+    color: var(--text); max-width: 80%; margin-left: auto;
+  }
+  .msg.interviewer .body { color: #e0e0e5; }
+  .msg.system .body { color: var(--text-muted); font-style: italic; font-size: 13px; }
+
+  .msg .body p { margin-bottom: 8px; }
+  .msg .body p:last-child { margin-bottom: 0; }
+  .msg .body pre { background: rgba(0,0,0,0.3); padding: 10px 14px; border-radius: var(--radius-sm); overflow-x: auto; margin: 8px 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #aaa; line-height: 1.5; }
+  .msg .body code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: rgba(0,0,0,0.3); padding: 1px 5px; border-radius: 4px; color: #aaa; }
+
+  .msg .label { font-size: 11px; font-weight: 500; color: var(--text-muted); margin-bottom: 4px; letter-spacing: 0.2px; }
+  .msg.you .label { text-align: right; color: var(--accent); opacity: 0.7; }
+  .msg.interviewer .label { color: var(--accent); }
+  .msg.system .label { color: #c8a060; }
+
+  /* INPUT */
+  .input-wrap { border-top: 1px solid var(--border); padding: 12px 20px 16px; background: var(--bg); flex-shrink: 0; }
+  .input-row { display: flex; gap: 8px; align-items: flex-end; background: var(--bg-elevated); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 4px; transition: border-color 0.2s; }
+  .input-row:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .input-row textarea {
+    flex: 1; padding: 8px 12px; background: transparent; border: none;
+    color: var(--text); font-size: 14px; font-family: inherit;
+    resize: none; outline: none; min-height: 24px; max-height: 120px; line-height: 1.5;
+  }
+  .input-row textarea::placeholder { color: var(--text-muted); }
+  .input-row textarea:disabled { opacity: 0.5; }
+  .input-row .send-btn {
+    padding: 8px 16px; background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius-sm); font-size: 13px;
+    font-weight: 500; font-family: inherit; cursor: pointer;
+    transition: opacity 0.2s; white-space: nowrap; height: 36px;
+  }
+  .input-row .send-btn:hover:not(:disabled) { opacity: 0.9; }
+  .input-row .send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .input-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; padding: 0 4px; }
+  .input-footer .hint { font-size: 11px; color: var(--text-muted); }
+  .input-footer .end-btn { font-size: 11px; color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s; }
+  .input-footer .end-btn:hover { background: rgba(239,68,68,0.1); color: var(--danger); }
+
+  .typing {
+    display: none; padding: 0 20px 8px; font-size: 13px;
+    color: var(--text-muted); font-style: italic; align-items: center; gap: 8px;
+  }
+  .typing.visible { display: flex; }
+  .typing .dots span {
+    display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+    background: var(--text-muted); animation: dotBounce 1.4s ease-in-out infinite both; margin-right: 3px;
+  }
+  .typing .dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing .dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dotBounce { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
+
+  /* REPORT */
+  .report-section { display: none; border-top: 1px solid var(--border); padding: 20px; background: var(--bg); flex-shrink: 0; }
+  .report-section.visible { display: block; }
+  .report-section h3 { font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; }
+  .report-section p { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5; }
+  .report-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .report-actions .btn {
+    padding: 8px 18px; border-radius: var(--radius-sm); font-size: 13px;
+    font-weight: 500; font-family: inherit; border: none; cursor: pointer; transition: all 0.2s;
+  }
+  .report-actions .btn-primary { background: var(--accent); color: #fff; }
+  .report-actions .btn-primary:hover { opacity: 0.9; }
+  .report-actions .btn-secondary { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border); }
+  .report-actions .btn-secondary:hover { background: var(--bg-hover); color: var(--text); }
+  .report-actions .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .report-msg { font-size: 12px; margin-top: 10px; padding: 8px 12px; border-radius: var(--radius-sm); display: none; }
+  .report-msg.success { display: block; background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.15); color: var(--success); }
+  .report-msg.error { display: block; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.15); color: var(--danger); }
+
+  /* LOADING */
+  .loading-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+    z-index: 200; align-items: center; justify-content: center;
+  }
+  .loading-overlay.visible { display: flex; }
+  .loading-box { text-align: center; }
+  .loading-box .spinner {
+    width: 28px; height: 28px; border: 2px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 14px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-box p { font-size: 14px; color: var(--text-secondary); }
+
+  @media (max-width: 640px) {
+    .header { padding: 10px 14px; }
+    .header .phase-badge { display: none; }
+    .chat { padding: 14px 14px 4px; }
+    .input-wrap { padding: 10px 14px 12px; }
+    .msg.you .body { max-width: 90%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <p id="loading-text">Processing...</p>
+  </div>
+</div>
+
+<!-- Password Gate -->
+<div class="gate-overlay visible" id="gate-overlay">
+  <div class="gate-box">
+    <h1>Access Code Required</h1>
+    <p>Enter the access code you received to begin your session.</p>
+    <input type="password" id="password-input" placeholder="Enter access code" autocomplete="off" />
+    <div class="gate-error" id="gate-error">Incorrect code. Please try again.</div>
+    <button class="submit-btn" id="unlock-btn">Continue</button>
+  </div>
+</div>
+
+<!-- Main App -->
+<div class="app" id="app">
+  <div class="header">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      Psychological Profile
+    </div>
+    <div class="phase-badge" id="phase-badge">
+      <span class="phase" id="phase-label">Phase 1: Baseline</span>
+      <span style="color:var(--text-muted);font-size:11px;" id="q-count">—</span>
+    </div>
+  </div>
+
+  <div class="chat" id="chat"></div>
+
+  <div class="typing" id="typing">
+    <div class="dots"><span></span><span></span><span></span></div>
+    Interviewer is formulating...
+  </div>
+
+  <div class="report-section" id="report-section">
+    <h3>Interview Complete</h3>
+    <p>Your report is ready for download. It will be delivered directly to you.</p>
+    <div class="report-actions">
+      <button class="btn btn-primary" id="gen-report-btn">Generate Full Report</button>
+      <button class="btn btn-secondary" id="dl-report-btn" style="display:none;">Download Report</button>
+      <button class="btn btn-secondary" id="reset-btn">New Session</button>
+    </div>
+    <div class="report-msg" id="report-msg"></div>
+  </div>
+
+  <div class="input-wrap" id="input-wrap">
+    <div class="input-row">
+      <textarea id="user-input" rows="1" placeholder="Type your response..." disabled></textarea>
+      <button class="send-btn" id="send-btn" disabled>Send</button>
+    </div>
+    <div class="input-footer">
+      <span class="hint">Enter to send · Shift+Enter for new line</span>
+      <button class="end-btn" id="end-btn">End interview</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONFIG — Update this to your deployed worker URL
+// ============================================================
+const API_BASE = 'https://psych-profiler.YOUR-SUBDOMAIN.workers.dev';
+
+// ============================================================
+const STATE = {
+  password: '', conversation: [], phase: 1, questionCount: 0,
+  isProcessing: false, profileDelivered: false, reportMarkdown: '',
+};
+
+const SYSTEM_PROMPT = `You are a senior behavioral analyst and psychological interviewer with 20+ years of experience in forensic psychological profiling, cognitive assessment, and deep-dive personality analysis. You are based on the methodology of the FBI's Behavioral Analysis Unit.
+
+## YOUR MISSION
+You conduct structured psychological interviews to build a comprehensive profile of the subject. You proceed methodically, like a clinical intake session or a BAU deep-dive interview.
+
+## INTERNAL REASONING
+- After each user reply, analyze what the subject's answer reveals. Note patterns, contradictions, avoidances, emotional tone, defense mechanisms. This is your private case analysis.
+- Before transitioning phases, assess whether the subject is ready for the next depth level based on rapport so far.
+- Before the final synthesis, build the full profile in your reasoning first — every section of the 8-part template — then deliver it cleanly.
+- If you detect deception, deflection, or surface-level answers, note it and decide whether to gently probe deeper or move on.
+
+## OUTPUT RULES
+1. You drive the session. Ask ONE question at a time. Wait for their answer.
+2. No premature analysis. Never offer conclusions early.
+3. Use active listening. Periodically reflect back what you're hearing to confirm accuracy.
+4. Be precise, not brutal. Frame findings constructively. Never pathologize normal variation.
+5. No diagnosis. Describe patterns, traits, and tendencies — not disorders.
+
+## PHASE 1 — Baseline & Rapport (5-7 questions)
+Occupation, age range, relationship status, self-described personality, why they want this analysis.
+
+## PHASE 2 — Cognitive & Emotional Patterns (7-10 questions)
+Decision-making style, emotional regulation, stress responses, coping mechanisms, core fears and motivators.
+
+## PHASE 3 — Relational & Social Dynamics (5-7 questions)
+Attachment style, trust patterns, conflict communication, how they think others perceive them.
+
+## PHASE 4 — Shadow & Vulnerability Probe (3-5 questions)
+Regrets, shame, recurring negative patterns, what they hide from others and from themselves.
+
+## PHASE 5 — Synthesis & Profile Delivery
+Output the structured profile with EXACTLY these sections:
+--- 1. EXECUTIVE SUMMARY ---
+--- 2. PERSONALITY ARCHITECTURE --- (Primary Temperament, Core Drive, Cognitive Style, Emotional Regulation)
+--- 3. DEFENSE STRUCTURE --- (Primary defense mechanisms with evidence)
+--- 4. ATTACHMENT & RELATIONAL PROFILE --- (Attachment Style, Relational Patterns, Conflict Footprint)
+--- 5. STRESS & COPING PROFILE --- (Stress Reactivity, Primary Coping Strategies, Maladaptive Patterns)
+--- 6. SHADOW INTEGRATION AREAS --- (Blind spots, unowned traits, recurring self-sabotage patterns)
+--- 7. RISK & RESILIENCE ASSESSMENT --- (Protective Factors, Risk Factors, Overall Resilience)
+--- 8. RECOMMENDATIONS --- (Actionable suggestions)
+
+## OPENING (use this exact first message)
+"Hello. Before we begin — you're in control. You can skip any question or end at any time. My job is to understand your perspective clearly, not to judge.
+
+Let's start simple. In your own words, who are you? Not your roles or titles — but if you had to describe the core of who you are, what would you say?"
+
+After delivering the full profile, ask: "Would you like me to save this as a detailed report?"`;
+
+// DOM
+const $ = id => document.getElementById(id);
+const gateOverlay = $('gate-overlay');
+const passwordInput = $('password-input');
+const unlockBtn = $('unlock-btn');
+const gateError = $('gate-error');
+const chat = $('chat');
+const userInput = $('user-input');
+const sendBtn = $('send-btn');
+const typing = $('typing');
+const phaseLabel = $('phase-label');
+const qCount = $('q-count');
+const endBtn = $('end-btn');
+const reportSection = $('report-section');
+const genReportBtn = $('gen-report-btn');
+const dlReportBtn = $('dl-report-btn');
+const resetBtn = $('reset-btn');
+const reportMsg = $('report-msg');
+const loadingOverlay = $('loading-overlay');
+const loadingText = $('loading-text');
+
+function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+
+function scrollChat() { chat.scrollTop = chat.scrollHeight; }
+
+function addMessage(role, content) {
+  const div = document.createElement('div');
+  div.className = `msg ${role === 'assistant' ? 'interviewer' : role === 'user' ? 'you' : 'system'}`;
+  const label = role === 'assistant' ? 'Interviewer' : role === 'user' ? 'You' : 'System';
+  const avatar = role === 'assistant' ? 'I' : role === 'user' ? 'Y' : '●';
+  const formatted = role === 'assistant' ? formatContent(content) : escapeHtml(content);
+  div.innerHTML = `<div class="row"><div class="avatar">${avatar}</div><div class="body"><div class="label">${label}</div>${role === 'user' ? `<p>${formatted}</p>` : formatted}</div></div>`;
+  chat.appendChild(div);
+  scrollChat();
+}
+
+function formatContent(text) {
+  let html = escapeHtml(text);
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => `<pre><code>${escapeHtml(code)}</code></pre>`);
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  html = html.split('\n\n').map(p => { const t = p.trim(); if (!t) return ''; if (t.startsWith('<')) return t; return `<p>${t.replace(/\n/g, '<br>')}</p>`; }).join('');
+  return html;
+}
+
+function setProcessing(val) {
+  STATE.isProcessing = val;
+  userInput.disabled = val;
+  sendBtn.disabled = val;
+  typing.classList.toggle('visible', val);
+  if (!val) userInput.focus();
+}
+
+function updatePhase() {
+  const names = { 1: 'Phase 1: Baseline', 2: 'Phase 2: Cognitive & Emotional', 3: 'Phase 3: Relational & Social', 4: 'Phase 4: Vulnerability Probe', 5: 'Phase 5: Profile Delivery' };
+  phaseLabel.textContent = names[STATE.phase] || 'Interview';
+  qCount.textContent = `Q${STATE.questionCount}`;
+}
+
+function detectPhase(text) {
+  if (!text) return STATE.phase;
+  if (text.includes('PHASE 1') || text.includes('Phase 1')) return 1;
+  if (text.includes('PHASE 2') || text.includes('Phase 2')) return 2;
+  if (text.includes('PHASE 3') || text.includes('Phase 3')) return 3;
+  if (text.includes('PHASE 4') || text.includes('Phase 4') || text.includes('Shadow')) return 4;
+  if (text.includes('PSYCHOLOGICAL PROFILE') || text.includes('EXECUTIVE SUMMARY')) return 5;
+  return STATE.phase;
+}
+
+function showLoading(text) { loadingText.textContent = text || 'Processing...'; loadingOverlay.classList.add('visible'); }
+function hideLoading() { loadingOverlay.classList.remove('visible'); }
+
+async function apiPost(endpoint, body) {
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Password': STATE.password },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) { const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` })); throw new Error(err.error || `Server error (${res.status})`); }
+  return res.json();
+}
+
+async function doChat(messages, system) { return apiPost('/api/chat', { messages, system }); }
+async function doGenerateReport(conversation) { return apiPost('/api/generate-report', { conversation }); }
+
+async function handleUnlock() {
+  const password = passwordInput.value.trim();
+  if (!password) { gateError.textContent = 'Please enter the access code.'; gateError.classList.add('visible'); return; }
+  unlockBtn.disabled = true; unlockBtn.textContent = 'Verifying...';
+  try {
+    const res = await fetch(`${API_BASE}/api/verify`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) });
+    const data = await res.json();
+    if (data.valid) {
+      STATE.password = password; gateError.classList.remove('visible');
+      gateOverlay.classList.remove('visible');
+      setTimeout(startInterview, 200);
+    } else { gateError.textContent = 'Incorrect code. Please try again.'; gateError.classList.add('visible'); }
+  } catch (e) { gateError.textContent = 'Cannot reach server. Check deployment.'; gateError.classList.add('visible'); }
+  finally { unlockBtn.disabled = false; unlockBtn.textContent = 'Continue'; }
+}
+
+passwordInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); handleUnlock(); }});
+unlockBtn.addEventListener('click', handleUnlock);
+
+async function startInterview() {
+  STATE.conversation = []; STATE.phase = 1; STATE.questionCount = 0;
+  STATE.profileDelivered = false; STATE.reportMarkdown = '';
+  chat.innerHTML = ''; reportSection.classList.remove('visible');
+  genReportBtn.style.display = 'block'; dlReportBtn.style.display = 'none'; reportMsg.className = 'report-msg';
+  userInput.disabled = false; sendBtn.disabled = false; updatePhase();
+  setProcessing(true);
+  try {
+    const result = await doChat([], SYSTEM_PROMPT);
+    const content = result.content;
+    STATE.conversation.push({ role: 'assistant', content });
+    addMessage('assistant', content);
+    STATE.questionCount = 1; updatePhase();
+  } catch (e) { addMessage('system', `Connection error: ${e.message}`); }
+  finally { setProcessing(false); }
+}
+
+async function handleSend() {
+  const text = userInput.value.trim();
+  if (!text || STATE.isProcessing || STATE.profileDelivered) return;
+  STATE.conversation.push({ role: 'user', content: text });
+  addMessage('user', text);
+  userInput.value = ''; userInput.style.height = 'auto';
+  setProcessing(true);
+  try {
+    const apiMessages = STATE.conversation.map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.content }));
+    const result = await doChat(apiMessages, SYSTEM_PROMPT);
+    const content = result.content;
+    STATE.conversation.push({ role: 'assistant', content });
+    addMessage('assistant', content);
+    const np = detectPhase(content);
+    if (np !== STATE.phase) { STATE.phase = np; STATE.questionCount = 0; }
+    STATE.questionCount++; updatePhase();
+    if (np === 5 && content.includes('PSYCHOLOGICAL PROFILE')) {
+      STATE.profileDelivered = true;
+      setTimeout(() => { reportSection.classList.add('visible'); chat.scrollTop = chat.scrollHeight; }, 500);
+    }
+    if (STATE.profileDelivered && text.toLowerCase().match(/^(yes|sure|ok|please|generate|save)/)) {
+      setTimeout(generateReport, 800);
+    }
+  } catch (e) { addMessage('system', `Error: ${e.message}`); }
+  finally { setProcessing(false); }
+}
+
+function endInterview() {
+  if (STATE.conversation.length < 4) { reportMsg.textContent = 'Not enough conversation for a report.'; reportMsg.className = 'report-msg error'; reportSection.classList.add('visible'); return; }
+  if (confirm('End the interview? You can still generate a report.')) { STATE.profileDelivered = true; reportSection.classList.add('visible'); genReportBtn.style.display = 'block'; }
+}
+
+async function generateReport() {
+  if (STATE.conversation.length < 4) { reportMsg.textContent = 'Not enough data.'; reportMsg.className = 'report-msg error'; return; }
+  showLoading('Generating your psychological profile report...');
+  genReportBtn.disabled = true; genReportBtn.textContent = 'Generating...';
+  try {
+    const result = await doGenerateReport(STATE.conversation);
+    STATE.reportMarkdown = result.report;
+    hideLoading();
+    genReportBtn.style.display = 'none'; dlReportBtn.style.display = 'inline-block';
+    reportMsg.textContent = 'Report ready. Click Download to get your file.';
+    reportMsg.className = 'report-msg success';
+    downloadReport();
+  } catch (e) {
+    hideLoading(); genReportBtn.disabled = false; genReportBtn.textContent = 'Generate Full Report';
+    reportMsg.textContent = `Error: ${e.message}`; reportMsg.className = 'report-msg error';
+  }
+}
+
+function downloadReport() {
+  if (!STATE.reportMarkdown) return;
+  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Psychological Profile</title><style>
+    @page { size: letter; margin: 0.9in; }
+    body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.6; color: #1a1a1a; max-width: 700px; margin: 0 auto; padding: 20px; }
+    .cover { text-align: center; padding-top: 160px; padding-bottom: 60px; }
+    .cover h1 { font-size: 26pt; letter-spacing: 3px; font-weight: normal; margin-bottom: 8px; }
+    .cover .sub { font-size: 14pt; color: #555; margin-bottom: 40px; }
+    .cover .meta { font-size: 11pt; color: #777; line-height: 2; }
+    h1 { font-size: 22pt; text-align: center; font-weight: normal; margin-top: 30px; }
+    h2 { font-size: 16pt; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-top: 28px; font-weight: 600; }
+    h3 { font-size: 13pt; margin-top: 18px; font-weight: 600; }
+    p { margin: 6px 0 10px; text-align: justify; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 24px 0; }
+    pre { background: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 10pt; overflow-x: auto; }
+    code { background: #f5f5f5; padding: 1px 4px; border-radius: 3px; font-size: 10pt; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    td { border: 1px solid #ccc; padding: 6px 10px; vertical-align: top; }
+    td:first-child { font-weight: bold; background: #f5f5f5; width: 30%; }
+    .page-break { page-break-before: always; }
+    .footer { font-size: 9pt; color: #999; text-align: center; margin-top: 40px; border-top: 1px solid #ddd; padding-top: 16px; }
+  </style></head><body>
+  <div class="cover"><h1>PSYCHOLOGICAL PROFILE</h1><div class="sub">Confidential Behavioral Analysis</div><div class="meta"><p>Date: ${date}</p><p style="margin-top:50px;font-size:10pt;color:#aaa;">Not a clinical diagnosis or formal psychological evaluation.</p></div></div>
+  <div class="page-break"></div>
+  ${STATE.reportMarkdown.split('\n').map(line => {
+    if (line.startsWith('### ')) return `<h3>${line.slice(4)}</h3>`;
+    if (line.startsWith('## ')) return `<h2>${line.slice(3)}</h2>`;
+    if (line.startsWith('# ')) return `<h1>${line.slice(2)}</h1>`;
+    if (line.startsWith('---')) return `<hr>`;
+    if (line.trim() === '') return '';
+    return `<p>${line}</p>`;
+  }).join('\n')}
+  <p class="footer">Confidential · Generated ${new Date().toLocaleString()}</p>
+  </body></html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `psychological_profile_${new Date().toISOString().split('T')[0]}.html`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  reportMsg.innerHTML = '✅ Report downloaded. Open and use <strong>Cmd/Ctrl+P → Save as PDF</strong>.';
+  reportMsg.className = 'report-msg success';
+}
+
+function resetApp() {
+  if (STATE.conversation.length > 0 && !confirm('Start a new session?')) return;
+  gateOverlay.classList.add('visible'); passwordInput.value = ''; passwordInput.focus();
+  chat.innerHTML = ''; STATE.conversation = []; STATE.profileDelivered = false; STATE.reportMarkdown = '';
+  reportSection.classList.remove('visible'); genReportBtn.style.display = 'block'; dlReportBtn.style.display = 'none'; reportMsg.className = 'report-msg';
+}
+
+sendBtn.addEventListener('click', handleSend);
+userInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }});
+userInput.addEventListener('input', () => { userInput.style.height = 'auto'; userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px'; });
+endBtn.addEventListener('click', endInterview);
+genReportBtn.addEventListener('click', generateReport);
+dlReportBtn.addEventListener('click', downloadReport);
+resetBtn.addEventListener('click', resetApp);
+passwordInput.focus();
+</script>
+</body>
+</html>
