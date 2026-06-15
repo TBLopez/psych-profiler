@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useInterviewState } from '../context/InterviewContext';
 import { useInterview } from '../hooks/useInterview';
-import { downloadReport } from '../lib/downloadReport';
+import { downloadReport, printReport } from '../lib/downloadReport';
 import StatusMessage from '../components/StatusMessage';
 import StatsCounter from '../components/StatsCounter';
 import ReportPreview from '../components/ReportPreview';
@@ -27,6 +27,12 @@ export default function ReportView() {
     }
   };
 
+  const handlePrint = () => {
+    if (reportMarkdown) {
+      printReport(reportMarkdown);
+    }
+  };
+
   const handleReset = () => {
     reset();
   };
@@ -37,8 +43,6 @@ export default function ReportView() {
     if (reportMarkdown && reportMarkdown !== prevReportRef.current) {
       prevReportRef.current = reportMarkdown;
       setShowSparkles(true);
-      // Auto-download
-      setTimeout(() => downloadReport(reportMarkdown), 400);
     }
   }, [reportMarkdown]);
 
@@ -102,15 +106,27 @@ export default function ReportView() {
               {isProcessing ? 'Generating...' : 'Generate Full Report'}
             </motion.button>
           ) : (
-            <motion.button
-              onClick={handleDownload}
-              className="w-full py-3.5 bg-gradient-to-r from-accent-primary to-accent-deep text-white rounded-2xl text-[15px] font-medium transition-opacity hover:opacity-90 shadow-[0_4px_16px_rgba(79,70,229,0.2)]"
-              whileTap={{ scale: 0.98 }}
-              animate={{ scale: [1, 1.02, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              Download Report
-            </motion.button>
+            <>
+              <motion.button
+                onClick={handlePrint}
+                className="w-full py-3.5 bg-gradient-to-r from-accent-primary to-accent-deep text-white rounded-2xl text-[15px] font-medium transition-opacity hover:opacity-90 shadow-[0_4px_16px_rgba(79,70,229,0.2)]"
+                whileTap={{ scale: 0.98 }}
+                animate={{ scale: [1, 1.02, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                Save as PDF
+              </motion.button>
+              <motion.button
+                onClick={handleDownload}
+                className="w-full py-3.5 bg-white text-ink-secondary border border-border rounded-2xl text-[14px] font-medium transition-colors hover:bg-surface-raised hover:text-ink"
+                whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
+                Download HTML
+              </motion.button>
+            </>
           )}
           <button
             onClick={handleReset}
@@ -123,7 +139,7 @@ export default function ReportView() {
         {error && <StatusMessage type="error">{error}</StatusMessage>}
 
         <p className="text-[11px] text-ink-muted mt-6">
-          The report downloads as HTML. Use <strong>Cmd/Ctrl+P → Save as PDF</strong> for a print-ready copy.
+          Save as PDF opens a print dialog. Download HTML saves a self-contained file you can open in any browser.
         </p>
       </motion.div>
 

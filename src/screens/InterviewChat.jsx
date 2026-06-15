@@ -69,12 +69,12 @@ export default function InterviewChat() {
 
   return (
     <div
-      className="flex flex-col h-screen h-[100dvh] max-w-[820px] mx-auto w-full relative"
+      className="flex flex-col h-screen h-[100dvh] max-w-full md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto w-full relative"
       onMouseMove={cursorGlow.handleMouseMove}
       onMouseLeave={cursorGlow.handleMouseLeave}
     >
       {/* Header */}
-      <header className="flex items-center justify-between px-5 py-3.5 border-b border-border-light bg-surface shrink-0 min-h-[56px]">
+      <header className="flex items-center justify-between px-4 sm:px-5 md:px-6 py-3.5 border-b border-border-light bg-surface shrink-0 min-h-[56px]">
         <div className="flex items-center gap-2.5 text-sm font-medium text-ink">
           <motion.span
             className="w-2 h-2 rounded-full bg-accent-primary opacity-70"
@@ -89,7 +89,7 @@ export default function InterviewChat() {
       {/* Chat */}
       <div
         ref={chatRef}
-        className="flex-1 overflow-y-auto px-5 py-4"
+        className="flex-1 overflow-y-auto px-4 sm:px-5 md:px-6 py-4"
         role="log"
         aria-live="polite"
         aria-label="Interview conversation"

@@ -54,15 +54,15 @@ export default function ChatBubble({ role, content, isProfileDelivery }) {
 
         {/* Content */}
         {isUser ? (
-          <div className="px-4 py-2.5 max-w-[80%] sm:max-w-[70%] bg-gradient-to-br from-accent-primary to-accent-deep text-white rounded-2xl rounded-br-sm shadow-[0_2px_8px_rgba(79,70,229,0.15)]">
+          <div className="px-4 py-2.5 max-w-[85%] sm:max-w-[75%] md:max-w-[65%] lg:max-w-[60%] bg-gradient-to-br from-accent-primary to-accent-deep text-white rounded-2xl rounded-br-sm shadow-[0_2px_8px_rgba(79,70,229,0.15)]">
             <p className="text-[15px] leading-relaxed">{content}</p>
           </div>
         ) : isSystem ? (
-          <div className="text-[13px] leading-relaxed text-ink-muted italic px-3 py-1.5 bg-amber-50/50 rounded-lg border border-amber-200/50 max-w-[85%]">
+          <div className="text-[13px] leading-relaxed text-ink-muted italic px-3 py-1.5 bg-amber-50/50 rounded-lg border border-amber-200/50 max-w-[90%] sm:max-w-[85%] md:max-w-[75%]">
             <span dangerouslySetInnerHTML={{ __html: bodyHtml }} />
           </div>
         ) : hasProfileSections ? (
-          <div className="space-y-4 max-w-[85%]">
+          <div className="space-y-4 max-w-[95%] sm:max-w-[85%] md:max-w-[80%]">
             {content.split(/(---.*?---)/g).filter(Boolean).map((section, i) => {
               if (section.match(/---.*?---/)) {
                 const sectionName = section.replace(/---/g, '').trim();
@@ -83,7 +83,7 @@ export default function ChatBubble({ role, content, isProfileDelivery }) {
           </div>
         ) : (
           <div
-            className="text-[15px] leading-relaxed text-ink-secondary bg-white/90 backdrop-blur-sm border border-border rounded-xl px-4 py-3 shadow-sm max-w-[85%]"
+            className="text-[15px] leading-relaxed text-ink-secondary bg-white/90 backdrop-blur-sm border border-border rounded-xl px-4 py-3 shadow-sm max-w-[90%] sm:max-w-[85%] md:max-w-[75%] lg:max-w-[70%]"
             dangerouslySetInnerHTML={{ __html: bodyHtml }}
           />
         )}

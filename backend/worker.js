@@ -75,52 +75,128 @@ async function handleGenerateReport(request, env, corsHeaders) {
   const { conversation } = body;
   if (!conversation || !Array.isArray(conversation) || conversation.length < 2) return new Response(JSON.stringify({ error: 'Insufficient conversation data' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
-  const systemPrompt = `You are a senior behavioral analyst with 20+ years of experience in forensic psychological profiling. You are generating a comprehensive 10+ page psychological profile report based on a structured interview.`;
+  const systemPrompt = `You are a senior behavioral analyst with 20+ years of experience in forensic psychological profiling (FBI BAU tradition), psychodynamic assessment, cognitive-behavioral formulation, and cross-cultural personality psychology. You are generating a comprehensive, academically-grounded psychological profile report based on a structured clinical interview. Your analysis draws on empirically validated frameworks: the Big Five (OCEAN) / HEXACO personality models, attachment theory (Bowlby, Ainsworth, Bartholomew), defense mechanism classification (Vaillant, DSM-5-TR Levels of Defensive Functioning), cognitive-behavioral theory (Beck, Ellis), psychodynamic formulation (McWilliams, Kernberg), and narrative identity theory (McAdams). Reference these frameworks by name when they inform your analysis.`;
 
-  const expandPrompt = `Based on the complete interview conversation below, generate an expanded, detailed 10+ page psychological profile report. Include ALL of the following sections with deep clinical analysis:
+  const expandPrompt = `Based on the complete interview conversation below, generate a comprehensive 15+ page psychological profile report. This must be thorough, clinically-informed, and analytically rigorous. Include ALL of the following sections with deep analysis. Write at least 4000+ words.
 
-## Full Report Structure
+## Report Structure
 
 ### Cover Page
 Psychological Profile — Confidential | [Current Date]
+"Not a clinical diagnosis or formal psychological evaluation. This profile is a structured behavioral analysis based on a single-session interview."
+
+---
 
 ### I. Preliminary Observations & Interview Context
-How the subject presented, communication style, rapport quality, willingness, defenses observed.
+How the subject presented. Communication style (verbal fluency, coherence, emotional expressiveness, guardedness). Rapport quality and willingness to disclose. Defenses observed during the interview itself (humor, intellectualization, minimization, deflection, etc.). First impressions and how they shifted. What the subject chose to lead with and what that signals.
 
-### II. Full Transcript Analysis (by Phase)
-For each of the 5 phases, include every question and answer with clinical observations. Analyze each response.
+---
+
+### II. Transcript Analysis by Phase
+For each of the 5 interview phases, include the actual questions asked and answers given (paraphrased with key direct quotes), followed by clinical observations. Analyze what each response reveals — not just content but process: what is emphasized, what is omitted, emotional tone, cognitive style, defensive patterns visible in the response structure. Connect observations to the frameworks named above.
+
+**Phase 1 — Baseline & Rapport:** Surface identity, life context, motivation for the interview.
+**Phase 2 — Cognitive & Emotional Patterns:** Decision-making, emotional regulation, stress responses, coping, core fears and drives.
+**Phase 3 — Relational & Social Dynamics:** Attachment patterns, trust, conflict style, interpersonal perception.
+**Phase 4 — Shadow & Vulnerability:** Regrets, shame, hidden patterns, self-sabotage, what is avoided.
+**Phase 5 — Synthesis & Profile Delivery:** The profile itself as delivered to the subject.
+
+---
 
 ### III. Integrated Formulation
-Central developmental narrative. Core conflict map. How past connects to present.
+A coherent clinical narrative that synthesizes findings across all domains into a unified psychological portrait. The central developmental narrative — how did this person become who they are? Core conflict map — what is the central tension driving their psychology? How does past experience shape present functioning? What is the organizing theme of their personality?
 
-### IV. Defense Structure — Deep Analysis
-Table: Defense | Rank | Manifestation | Adaptiveness | Risk. Cover at least 4-5 defenses.
+---
 
-### V. Core Conflict Map
-Pole A vs Pole B of the central tension. Secondary conflicts.
+### IV. Personality Architecture (with Evidence)
+- **Big Five / HEXACO Profile Table:** Trait | Estimated Level (Low/Average/High) | Interview Evidence
+- **Core Drive:** What fundamentally motivates this person? Achievement, affiliation, power, understanding, autonomy, security, or something else? Cite evidence.
+- **Cognitive Style:** How they process information and make decisions. Concrete vs abstract. Fast vs deliberate. System 1 vs System 2 dominance.
+- **Emotional Regulation Profile:** How emotions are experienced, expressed, and managed. Regulatory strategies used.
 
-### VI. Strength-Based Formulation
-Table: Strength | Manifestation | Leverage Point. At least 6-8 strengths.
+---
 
-### VII. Attachment & Relational Profile (Expanded)
-Deep analysis of relational patterns, attachment style, communication patterns.
+### V. Defense Structure — Deep Analysis
+Table: Defense Mechanism | Prominence (1-5) | Manifestation in Interview | Adaptiveness (Mature/Neurotic/Immature) | Risk if Overused
+Cover at least 4-5 defenses. Explain each with specific examples from the conversation. Classify using the DSM-5-TR Levels of Defensive Functioning scale.
 
-### VIII. Stress & Coping Profile (Expanded)
-Stress reactivity, coping strategies, maladaptive patterns.
+---
 
-### IX. Shadow Integration Areas
-Blind spots, unowned traits, recurring self-sabotage patterns.
+### VI. Core Conflict Map
+Identify and analyze the central psychological conflict:
+- **Primary Polarity:** Pole A vs Pole B of the core tension (e.g., intimacy vs autonomy, control vs vulnerability, achievement vs connection)
+- **Secondary Conflicts:** 2-3 additional tensions
+- **Conflict Origins:** Developmental roots of each conflict
+- **Current Manifestation:** How each conflict plays out in present life
 
-### X. Risk & Resilience Assessment
-Protective factors, risk factors, overall resilience with justification.
+---
 
-### XI. Recommendations — Expanded
-Therapeutic modalities with rationale. Behavioral experiments (specific). Reflection prompts.
+### VII. Strength-Based Formulation
+Table: Strength | Manifestation in Interview | How to Leverage for Growth
+Identify at least 6-8 genuine strengths. Be specific — not generic praise. Connect each strength to growth opportunities.
 
-### XII. Prognostic Summary
-Prognosis, key risks, key strengths, next steps.
+---
 
-Write the FULL report in markdown format. Be thorough — use clinical language. Go deep on every section. Write at least 3000+ words.
+### VIII. Attachment & Relational Profile
+- **Attachment Style:** Pattern description with evidence (not just a label). Reference Bartholomew's four-category model or Brennan's dimensional model.
+- **Trust Formation:** How trust is built, tested, and repaired.
+- **Conflict Footprint:** How they navigate disagreement. Conflict avoidance vs confrontation. Repair capacity.
+- **Interpersonal Perception Gap:** How they believe others see them vs how they likely come across. Discrepancies and their implications.
+- **Relational Patterns:** Recurring themes across relationships. Partner selection patterns. Friendship dynamics.
+
+---
+
+### IX. Stress & Coping Profile
+- **Stress Reactivity:** What triggers stress? Physiological/cognitive/emotional indicators.
+- **Primary Coping Strategies:** Problem-focused, emotion-focused, meaning-focused, avoidance.
+- **Maladaptive Patterns:** Coping strategies that maintain or worsen problems.
+- **Resilience Resources:** What protects this person? Social support, meaning-making, self-efficacy, etc.
+
+---
+
+### X. Shadow Integration
+- **Blind Spots:** What the subject cannot see about themselves, with evidence from the interview.
+- **Unowned Traits:** Positive and negative traits the subject disowns or minimizes.
+- **Recurring Self-Sabotage:** Patterns the subject describes but may not recognize as self-generated.
+- **Growth Edge:** Where the most potential for integration and development lies. What is trying to emerge?
+
+---
+
+### XI. Risk & Resilience Assessment
+- **Protective Factors:** What keeps this person well? (Internal and external)
+- **Risk Factors:** What threatens their wellbeing? (Internal and external)
+- **Crisis Risk:** Low/Moderate/Elevated with justification.
+- **Overall Resilience:** Assessment with specific rationale.
+
+---
+
+### XII. Recommendations
+- **Therapeutic Modalities:** 2-3 therapeutic approaches with specific rationale for why each fits this particular profile. Reference modalities by name (CBT, psychodynamic, DBT, ACT, IFS, EMDR, somatic, etc.).
+- **Behavioral Experiments:** 3-4 specific, actionable experiments the subject can try in daily life, designed to test and expand their psychological flexibility.
+- **Self-Reflection Prompts:** 4-5 deep journaling or reflection questions tailored to their specific profile.
+- **Growth Practices:** Daily or weekly practices aligned with their personality architecture.
+
+---
+
+### XIII. Prognostic Summary
+Prognosis for growth and change. Key risks to manage. Key strengths to leverage. What the next 1-2 years of intentional development could look like for this person.
+
+---
+
+### XIV. Recommended Reading
+Based on the subject's specific psychological profile, recommend 5-7 books that would be genuinely illuminating for them. These should be curated to their particular personality architecture, defense structure, relational patterns, and growth edges. For each book, include:
+- **Title** by Author
+- **Why this book for you:** A 2-3 sentence explanation connecting the book's content to specific aspects of the subject's profile. Be direct and personal — explain what they might recognize about themselves in this book.
+
+Choose from respected works in psychology, neuroscience, attachment theory, trauma, personality, relationships, and personal development. Prioritize books by credentialed authors (clinical psychologists, researchers, psychiatrists). Include a mix of:
+- 2-3 books addressing their core psychological patterns
+- 1-2 books addressing their relational/attachment style
+- 1-2 books on personal growth aligned with their specific growth edge
+- Consider including one work of fiction or memoir that mirrors their psychological journey
+
+---
+
+Write the COMPLETE report in markdown format. Use clinical language throughout. Be specific, not vague. Use direct quotes from the conversation as evidence. Every claim must be supported. Do not flatter or pull punches — accuracy over comfort. Write at least 4000 words.
 
 Here is the conversation:
 ${JSON.stringify(conversation, null, 2)}`;
@@ -129,7 +205,7 @@ ${JSON.stringify(conversation, null, 2)}`;
   const deepseekBody = {
     model,
     messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: expandPrompt }],
-    max_tokens: 8192,
+    max_tokens: 16384,
     temperature: 0.5,
     stream: false,
   };

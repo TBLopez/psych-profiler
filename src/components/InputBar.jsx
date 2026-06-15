@@ -44,7 +44,7 @@ export default function InputBar({ value, onChange, onSend, onEnd, disabled, sta
   const isProcessing = status === 'processing';
 
   return (
-    <div className="border-t border-border-light bg-surface/90 backdrop-blur-md px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom,0px))] shrink-0">
+    <div className="border-t border-border-light bg-surface/90 backdrop-blur-md px-3 sm:px-4 md:px-5 py-3 pb-[calc(12px+env(safe-area-inset-bottom,0px))] shrink-0">
       <motion.div
         className={`flex gap-2 items-end bg-white/90 backdrop-blur-sm border rounded-2xl px-4 py-2.5 transition-colors
           ${focused ? 'border-accent-primary shadow-[0_0_0_3px_var(--color-accent-glow-primary)]' : 'border-border'}`}
