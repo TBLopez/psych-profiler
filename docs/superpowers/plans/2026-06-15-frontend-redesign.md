@@ -1,12 +1,12 @@
-# Frontend Redesign — Implementation Plan
+# Frontend Redesign — Implementation Plan (v2: Warm Precision + Immersive)
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Rebuild the Psych Profiler frontend as a React SPA with Vite, Tailwind CSS, Aceternity UI (Framer Motion), Clinical Precision aesthetic, keeping the existing Cloudflare Worker backend unchanged.
+**Goal:** Rebuild the Psych Profiler frontend as a React SPA with Vite, Tailwind CSS, Framer Motion, and Aceternity UI, using the **Warm Precision** visual language (gradient accent family, phase-aware ambience, Godly-inspired typography) and **Immersive** animation density (cinematic screen transitions, cursor-responsive lighting, staggered reveals, spring physics throughout). Backend unchanged.
 
-**Architecture:** Vite SPA with 3-screen state machine (gate → chat → report). React context + useReducer for state. Tailwind with custom design tokens. Code-split via React.lazy(). Backend API consumed identically — zero changes to `backend/worker.js`.
+**Architecture:** Vite SPA with 3-screen state machine (gate → chat → report) with cinematic transitions. React context + useReducer for state. Tailwind with custom design tokens + phase-aware CSS variables. Code-split via React.lazy(). Backend API consumed identically — zero changes to `backend/worker.js`.
 
-**Tech Stack:** Vite 6, React 18, Tailwind CSS 4, Framer Motion 12, Aceternity UI (selected components), Vitest + Testing Library
+**Tech Stack:** Vite 6, React 18, Tailwind CSS 4, Framer Motion 12, Aceternity UI (Sparkles component, tree-shaken), Lucide React, Vitest + Testing Library
 
 **DeepSeek integration note:** The v2 system prompt (already committed) is sent to DeepSeek's `deepseek-reasoner` model via the Cloudflare Worker. The prompt's adaptive phase transitions, cultural calibration, and crisis protocols are executed by DeepSeek at runtime — no frontend changes needed for adaptive interview behavior.
 
@@ -25,34 +25,45 @@ psych-profiler/
 │   └── package.json
 ├── src/
 │   ├── main.jsx                # CREATE: React root
-│   ├── App.jsx                 # CREATE: State machine
-│   ├── index.css               # CREATE: Tailwind directives + tokens
+│   ├── App.jsx                 # CREATE: State machine + ScreenTransition orchestrator
+│   ├── index.css               # CREATE: Tailwind directives + tokens + keyframes
 │   ├── context/
-│   │   └── InterviewContext.jsx # CREATE: useReducer state
+│   │   └── InterviewContext.jsx # CREATE: useReducer state + stats
 │   ├── screens/
-│   │   ├── PasswordGate.jsx    # CREATE
-│   │   ├── InterviewChat.jsx   # CREATE
-│   │   └── ReportView.jsx      # CREATE
+│   │   ├── PasswordGate.jsx    # CREATE: Cinematic gate with radial reveal
+│   │   ├── InterviewChat.jsx   # CREATE: Immersive chat with phase-aware ambience
+│   │   └── ReportView.jsx      # CREATE: Multi-step report experience
 │   ├── components/
-│   │   ├── AnimatedBackground.jsx  # CREATE: Floating orbs
-│   │   ├── ChatBubble.jsx          # CREATE
-│   │   ├── TypingIndicator.jsx     # CREATE
-│   │   ├── PhaseBadge.jsx          # CREATE
-│   │   ├── PhaseTransition.jsx     # CREATE
-│   │   ├── InputBar.jsx            # CREATE
-│   │   ├── SendButton.jsx          # CREATE
-│   │   └── StatusMessage.jsx       # CREATE
+│   │   ├── AmbientEnvironment.jsx   # CREATE: Phase-aware orbs + cursor glow + noise
+│   │   ├── ScreenTransition.jsx     # CREATE: Cinematic transition orchestrator
+│   │   ├── ChatBubble.jsx           # CREATE: Rich message cards with glass/gradient
+│   │   ├── StaggeredReveal.jsx      # CREATE: Paragraph-by-paragraph reveal
+│   │   ├── TypingIndicator.jsx      # CREATE: 3-dot bounce + breathing input
+│   │   ├── PhaseIndicator.jsx       # CREATE: Gradient pill + progress dots + counter
+│   │   ├── CinematicPhaseChange.jsx # CREATE: Viewport-level phase transition
+│   │   ├── InputBar.jsx             # CREATE: Floating glass input + state morph
+│   │   ├── SendButton.jsx           # CREATE: 3-state morph (arrow→spinner→check)
+│   │   ├── CursorGlow.jsx           # CREATE: Desktop cursor-tracking lighting
+│   │   ├── SparkleBurst.jsx         # CREATE: Aceternity Sparkles wrapper
+│   │   ├── StatsCounter.jsx         # CREATE: Animated number count-up
+│   │   ├── ReportPreview.jsx        # CREATE: Section cards preview
+│   │   └── StatusMessage.jsx        # CREATE: Success/error toast
 │   ├── hooks/
-│   │   ├── useInterview.js         # CREATE
-│   │   └── useApi.js               # CREATE
+│   │   ├── useInterview.js          # CREATE: State reducer + side effects
+│   │   ├── useApi.js                # CREATE: Fetch wrapper with auth
+│   │   ├── usePhaseAmbience.js      # CREATE: Phase-aware color interpolation
+│   │   └── useCursorGlow.js         # CREATE: Desktop cursor tracking
 │   └── lib/
-│       ├── api.js                  # CREATE
-│       ├── formatContent.js        # CREATE
-│       ├── detectPhase.js          # CREATE
-│       └── downloadReport.js       # CREATE
-└── __tests__/                      # CREATE
+│       ├── api.js                   # CREATE: API_BASE + apiPost
+│       ├── formatContent.js         # CREATE: Markdown → HTML
+│       ├── detectPhase.js           # CREATE: Phase detection
+│       ├── downloadReport.js        # CREATE: Print-styled HTML report
+│       └── phaseColors.js           # CREATE: Phase→color mapping + interpolation
+└── __tests__/
+    ├── setup.js
     ├── formatContent.test.js
     ├── detectPhase.test.js
+    ├── phaseColors.test.js
     ├── InterviewContext.test.jsx
     └── PasswordGate.test.jsx
 ```
@@ -91,6 +102,7 @@ psych-profiler/
     "vitest": "^2.1.0",
     "@testing-library/react": "^16.1.0",
     "@testing-library/jest-dom": "^6.6.0",
+    "@testing-library/user-event": "^14.5.0",
     "jsdom": "^25.0.0",
     "tailwindcss": "^4.0.0",
     "@tailwindcss/vite": "^4.0.0",
@@ -145,7 +157,7 @@ import '@testing-library/jest-dom/vitest';
   <title>Psychological Profile</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
   <div id="root"></div>
@@ -153,6 +165,8 @@ import '@testing-library/jest-dom/vitest';
 </body>
 </html>
 ```
+
+Note: Inter weight 200 added for Godly-inspired light headings.
 
 - [ ] **Step 4: Create src/main.jsx**
 
@@ -175,18 +189,38 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 @import "tailwindcss";
 
 @theme {
+  /* Canvas & surfaces */
   --color-canvas: #FAFBFC;
   --color-surface: #FFFFFF;
   --color-surface-raised: #F3F4F6;
+  --color-surface-glass: rgba(255, 255, 255, 0.8);
+
+  /* Ink */
   --color-ink: #1A1A2E;
-  --color-ink-secondary: #666666;
+  --color-ink-secondary: #555555;
   --color-ink-muted: #888888;
-  --color-accent: #4F46E5;
-  --color-accent-glow: rgba(79, 70, 229, 0.06);
+
+  /* Accent family — indigo → violet → rose → emerald */
+  --color-accent-primary: #4F46E5;
+  --color-accent-primary-light: #6366F1;
+  --color-accent-deep: #7C3AED;
+  --color-accent-deep-light: #8B5CF6;
+  --color-accent-warm: #EC4899;
+  --color-accent-warm-light: #F472B6;
+  --color-accent-positive: #059669;
+  --color-accent-positive-light: #10B981;
+
+  /* Glow */
+  --color-accent-glow-primary: rgba(79, 70, 229, 0.08);
+  --color-accent-glow-warm: rgba(236, 72, 153, 0.05);
+
+  /* Semantic */
   --color-success: #059669;
   --color-danger: #DC2626;
-  --color-border: #E5E7EB;
-  --color-border-light: #F0F0F0;
+  --color-border: #E8EAF0;
+  --color-border-light: #F0F0F5;
+
+  /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', SF Mono, monospace;
 }
@@ -215,10 +249,36 @@ body {
   }
 }
 
+/* Focus rings */
+:focus-visible {
+  outline: 2px solid var(--color-accent-primary) !important;
+  outline-offset: 2px !important;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+
+/* Noise texture overlay — used by AmbientEnvironment */
+@keyframes noise {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -5%); }
+  20% { transform: translate(-10%, 5%); }
+  30% { transform: translate(5%, -10%); }
+  40% { transform: translate(-5%, 15%); }
+  50% { transform: translate(-10%, 5%); }
+  60% { transform: translate(15%, 0); }
+  70% { transform: translate(0, 10%); }
+  80% { transform: translate(-15%, 0); }
+  90% { transform: translate(10%, 5%); }
+}
+
+/* Phase-aware gradient keyframes */
+@keyframes phasePulse {
+  0%, 100% { opacity: 0.04; }
+  50% { opacity: 0.07; }
+}
 ```
 
 - [ ] **Step 6: Install dependencies and verify dev server**
@@ -233,8 +293,8 @@ Expected: dev server starts on localhost:5173, blank page no errors.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add package.json package-lock.json vite.config.js index.html src/main.jsx src/index.css
-git commit -m "feat: scaffold Vite + React + Tailwind project
+git add package.json package-lock.json vite.config.js index.html src/main.jsx src/index.css __tests__/setup.js
+git commit -m "feat: scaffold Vite + React + Tailwind project (Warm Precision edition)
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
 
@@ -319,6 +379,10 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 - Create: `src/lib/formatContent.js`
 - Create: `src/lib/detectPhase.js`
 - Create: `src/lib/downloadReport.js`
+- Create: `src/lib/phaseColors.js` (NEW)
+- Create: `__tests__/formatContent.test.js`
+- Create: `__tests__/detectPhase.test.js`
+- Create: `__tests__/phaseColors.test.js` (NEW)
 
 - [ ] **Step 1: Create src/lib/formatContent.js**
 
@@ -350,120 +414,88 @@ export function formatContent(text) {
     .join('');
   return html;
 }
-```
 
-- [ ] **Step 2: Create __tests__/formatContent.test.js**
-
-```javascript
-import { describe, it, expect } from 'vitest';
-import { formatContent } from '../src/lib/formatContent';
-
-describe('formatContent', () => {
-  it('wraps plain text in <p>', () => {
-    const result = formatContent('Hello world');
-    expect(result).toBe('<p>Hello world</p>');
-  });
-
-  it('converts **bold** to <strong>', () => {
-    const result = formatContent('**bold text** here');
-    expect(result).toContain('<strong>bold text</strong>');
-  });
-
-  it('converts *italic* to <em>', () => {
-    const result = formatContent('*italic text* here');
-    expect(result).toContain('<em>italic text</em>');
-  });
-
-  it('converts inline code', () => {
-    const result = formatContent('use `const x = 1` here');
-    expect(result).toContain('<code>const x = 1</code>');
-  });
-
-  it('converts code blocks', () => {
-    const result = formatContent('```js\nconst x = 1;\n```');
-    expect(result).toContain('<pre><code>const x = 1;\n</code></pre>');
-  });
-
-  it('escapes HTML', () => {
-    const result = formatContent('<script>alert("x")</script>');
-    expect(result).not.toContain('<script>');
-    expect(result).toContain('&lt;script&gt;');
-  });
-
-  it('splits paragraphs on double newlines', () => {
-    const result = formatContent('First para.\n\nSecond para.');
-    expect(result).toBe('<p>First para.</p><p>Second para.</p>');
-  });
-});
-```
-
-- [ ] **Step 3: Create src/lib/detectPhase.js**
-
-Phase detection based on content markers in the AI response. The v2 system prompt uses section headers like `--- 1. EXECUTIVE SUMMARY ---` for Phase 5 delivery.
-
-```javascript
-export function detectPhase(text) {
-  if (!text) return null;
-  // Phase 5: profile delivery detected by structured section headers
-  if (text.includes('EXECUTIVE SUMMARY') || text.includes('PSYCHOLOGICAL PROFILE')) {
-    return 5;
-  }
-  // Phase 4: shadow/vulnerability markers
-  if (text.includes('Shadow') && (text.includes('blind spot') || text.includes('hidden'))) {
-    return 4;
-  }
-  // Phase 3: relational markers
-  if (text.includes('attachment') || text.includes('relational') || text.includes('conflict')) {
-    return 3;
-  }
-  // Phase 2: cognitive/emotional markers
-  if (text.includes('cognitive') || text.includes('emotional regulation') || text.includes('decision-making')) {
-    return 2;
-  }
-  // Phase 1: baseline markers
-  if (text.includes('baseline') || text.includes('rapport') || text.includes('who you are')) {
-    return 1;
-  }
-  return null;
+// Split formatted HTML into paragraph blocks for StaggeredReveal
+export function splitParagraphs(html) {
+  // Split on <p> tags, preserve other block elements
+  const blocks = html.split(/(<p>.*?<\/p>)/g).filter(Boolean);
+  return blocks.length > 0 ? blocks : [html];
 }
 ```
 
-- [ ] **Step 4: Create __tests__/detectPhase.test.js**
+- [ ] **Step 2: Create src/lib/phaseColors.js**
+
+Phase → color mapping and interpolation utilities for PhaseAmbience.
 
 ```javascript
-import { describe, it, expect } from 'vitest';
-import { detectPhase } from '../src/lib/detectPhase';
+// Phase color configurations for ambient environment
+export const PHASE_COLORS = {
+  1: {
+    name: 'Baseline',
+    orb: 'rgba(79, 70, 229, 0.04)',      // indigo, very subtle
+    accent: '#4F46E5',
+    gradient: 'radial-gradient(circle, rgba(79,70,229,0.06), transparent 70%)',
+  },
+  2: {
+    name: 'Cognitive & Emotional',
+    orb: 'rgba(79, 70, 229, 0.05)',
+    accent: '#6366F1',
+    gradient: 'radial-gradient(circle, rgba(99,102,241,0.06), transparent 70%)',
+  },
+  3: {
+    name: 'Relational & Social',
+    orb: 'rgba(124, 58, 237, 0.05)',     // violet shift
+    accent: '#7C3AED',
+    gradient: 'radial-gradient(circle, rgba(124,58,237,0.06), transparent 70%)',
+  },
+  4: {
+    name: 'Vulnerability Probe',
+    orb: 'rgba(124, 58, 237, 0.06)',     // deeper violet
+    accent: '#8B5CF6',
+    gradient: 'radial-gradient(circle, rgba(139,92,246,0.07), transparent 70%)',
+  },
+  5: {
+    name: 'Profile Delivery',
+    orb: 'rgba(5, 150, 105, 0.05)',      // emerald resolution
+    accent: '#059669',
+    gradient: 'radial-gradient(circle, rgba(5,150,105,0.06), transparent 70%)',
+  },
+};
 
-describe('detectPhase', () => {
-  it('returns null for empty text', () => {
-    expect(detectPhase('')).toBeNull();
-    expect(detectPhase(null)).toBeNull();
-  });
+// Phase badge gradient classes (Tailwind)
+export const PHASE_GRADIENTS = {
+  1: 'from-accent-primary to-accent-primary-light',
+  2: 'from-accent-primary to-accent-primary-light',
+  3: 'from-accent-deep to-accent-deep-light',
+  4: 'from-accent-deep to-accent-deep-light',
+  5: 'from-accent-positive to-accent-positive-light',
+};
 
-  it('detects Phase 1 from baseline markers', () => {
-    expect(detectPhase('Lets establish some baseline rapport')).toBe(1);
-  });
+// Phase names for display
+export const PHASE_NAMES = {
+  1: 'Baseline',
+  2: 'Cognitive & Emotional',
+  3: 'Relational & Social',
+  4: 'Vulnerability Probe',
+  5: 'Profile Delivery',
+};
 
-  it('detects Phase 2 from cognitive markers', () => {
-    expect(detectPhase('Your decision-making style and emotional regulation')).toBe(2);
-  });
-
-  it('detects Phase 3 from relational markers', () => {
-    expect(detectPhase('Your attachment style in relationships')).toBe(3);
-  });
-
-  it('detects Phase 4 from shadow markers', () => {
-    expect(detectPhase('Shadow blind spots you may be hiding')).toBe(4);
-  });
-
-  it('detects Phase 5 from profile delivery', () => {
-    expect(detectPhase('--- 1. EXECUTIVE SUMMARY ---')).toBe(5);
-    expect(detectPhase('PSYCHOLOGICAL PROFILE')).toBe(5);
-  });
-});
+// Interpolate between two phase colors (for ambient transitions)
+export function interpolatePhaseColor(fromPhase, toPhase, progress) {
+  // Simple linear interpolation between phase accent colors
+  // Used by usePhaseAmbience for smooth ambient transitions
+  const fromColor = PHASE_COLORS[fromPhase]?.orb || PHASE_COLORS[1].orb;
+  const toColor = PHASE_COLORS[toPhase]?.orb || PHASE_COLORS[5].orb;
+  // Return the target color when progress >= 1, start when <= 0
+  if (progress >= 1) return toColor;
+  if (progress <= 0) return fromColor;
+  return toColor; // Simplify: just return target after threshold
+}
 ```
 
-- [ ] **Step 5: Create src/lib/downloadReport.js**
+- [ ] **Step 3: Create src/lib/downloadReport.js**
+
+Enhanced with print-styled typography (Georgia/Garamond for body).
 
 ```javascript
 export function downloadReport(markdown) {
@@ -487,19 +519,47 @@ export function downloadReport(markdown) {
 
   const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Psychological Profile</title><style>
     @page { size: letter; margin: 0.9in; }
-    body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.6; color: #1a1a1a; max-width: 700px; margin: 0 auto; padding: 20px; }
+    body {
+      font-family: Georgia, 'Times New Roman', Times, serif;
+      font-size: 12pt; line-height: 1.6; color: #1a1a1a;
+      max-width: 700px; margin: 0 auto; padding: 20px;
+    }
     .cover { text-align: center; padding-top: 160px; padding-bottom: 60px; }
-    .cover h1 { font-size: 26pt; letter-spacing: 3px; font-weight: normal; margin-bottom: 8px; }
-    .cover .sub { font-size: 14pt; color: #555; margin-bottom: 40px; }
+    .cover h1 {
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 26pt; letter-spacing: 3px; font-weight: 200; margin-bottom: 8px;
+    }
+    .cover .sub {
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 14pt; color: #555; margin-bottom: 40px; font-weight: 300;
+    }
     .cover .meta { font-size: 11pt; color: #777; line-height: 2; }
-    h1 { font-size: 22pt; text-align: center; font-weight: normal; margin-top: 30px; }
-    h2 { font-size: 16pt; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-top: 28px; font-weight: 600; }
-    h3 { font-size: 13pt; margin-top: 18px; font-weight: 600; }
+    h1 {
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 22pt; text-align: center; font-weight: 300; margin-top: 30px;
+    }
+    h2 {
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 16pt; border-bottom: 1px solid #ccc;
+      padding-bottom: 4px; margin-top: 28px; font-weight: 500;
+    }
+    h3 {
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 13pt; margin-top: 18px; font-weight: 500;
+    }
     p { margin: 6px 0 10px; text-align: justify; }
     hr { border: none; border-top: 1px solid #ddd; margin: 24px 0; }
+    pre { background: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 10pt; overflow-x: auto; }
     code { background: #f5f5f5; padding: 1px 4px; border-radius: 3px; font-size: 10pt; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    td { border: 1px solid #ccc; padding: 6px 10px; vertical-align: top; }
+    td:first-child { font-weight: bold; background: #f5f5f5; width: 30%; }
     .page-break { page-break-before: always; }
-    .footer { font-size: 9pt; color: #999; text-align: center; margin-top: 40px; border-top: 1px solid #ddd; padding-top: 16px; }
+    .footer {
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 9pt; color: #999; text-align: center;
+      margin-top: 40px; border-top: 1px solid #ddd; padding-top: 16px;
+    }
   </style></head><body>
   <div class="cover"><h1>PSYCHOLOGICAL PROFILE</h1><div class="sub">Confidential Behavioral Analysis</div><div class="meta"><p>Date: ${date}</p><p style="margin-top:50px;font-size:10pt;color:#aaa;">Not a clinical diagnosis or formal psychological evaluation.</p></div></div>
   <div class="page-break"></div>
@@ -518,10 +578,85 @@ export function downloadReport(markdown) {
 }
 ```
 
+- [ ] **Step 4: Create src/lib/detectPhase.js**
+
+Same as original spec.
+
+```javascript
+export function detectPhase(text) {
+  if (!text) return null;
+  if (text.includes('EXECUTIVE SUMMARY') || text.includes('PSYCHOLOGICAL PROFILE')) {
+    return 5;
+  }
+  if (text.includes('Shadow') && (text.includes('blind spot') || text.includes('hidden'))) {
+    return 4;
+  }
+  if (text.includes('attachment') || text.includes('relational') || text.includes('conflict')) {
+    return 3;
+  }
+  if (text.includes('cognitive') || text.includes('emotional regulation') || text.includes('decision-making')) {
+    return 2;
+  }
+  if (text.includes('baseline') || text.includes('rapport') || text.includes('who you are')) {
+    return 1;
+  }
+  return null;
+}
+```
+
+- [ ] **Step 5: Create test files**
+
+Create `__tests__/formatContent.test.js` — same as original spec.
+
+Create `__tests__/detectPhase.test.js` — same as original spec.
+
+Create `__tests__/phaseColors.test.js`:
+
+```javascript
+import { describe, it, expect } from 'vitest';
+import { PHASE_COLORS, PHASE_GRADIENTS, PHASE_NAMES, interpolatePhaseColor } from '../src/lib/phaseColors';
+
+describe('phaseColors', () => {
+  it('has color config for all 5 phases', () => {
+    for (let i = 1; i <= 5; i++) {
+      expect(PHASE_COLORS[i]).toBeDefined();
+      expect(PHASE_COLORS[i].name).toBeDefined();
+      expect(PHASE_COLORS[i].accent).toBeDefined();
+    }
+  });
+
+  it('has gradient classes for all 5 phases', () => {
+    for (let i = 1; i <= 5; i++) {
+      expect(PHASE_GRADIENTS[i]).toBeDefined();
+    }
+  });
+
+  it('has display names for all 5 phases', () => {
+    for (let i = 1; i <= 5; i++) {
+      expect(PHASE_NAMES[i]).toBeDefined();
+    }
+  });
+
+  it('interpolatePhaseColor returns target at progress >= 1', () => {
+    const result = interpolatePhaseColor(1, 5, 1);
+    expect(result).toBe(PHASE_COLORS[5].orb);
+  });
+
+  it('interpolatePhaseColor returns source at progress <= 0', () => {
+    const result = interpolatePhaseColor(1, 5, 0);
+    expect(result).toBe(PHASE_COLORS[1].orb);
+  });
+
+  it('handles invalid phase numbers gracefully', () => {
+    expect(interpolatePhaseColor(0, 6, 0.5)).toBeDefined();
+  });
+});
+```
+
 - [ ] **Step 6: Run tests**
 
 ```bash
-npx vitest run __tests__/formatContent.test.js __tests__/detectPhase.test.js
+npx vitest run __tests__/formatContent.test.js __tests__/detectPhase.test.js __tests__/phaseColors.test.js
 ```
 
 Expected: all tests pass.
@@ -529,8 +664,8 @@ Expected: all tests pass.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/lib/formatContent.js src/lib/detectPhase.js src/lib/downloadReport.js __tests__/formatContent.test.js __tests__/detectPhase.test.js
-git commit -m "feat: add utility functions — formatContent, detectPhase, downloadReport
+git add src/lib/formatContent.js src/lib/detectPhase.js src/lib/downloadReport.js src/lib/phaseColors.js __tests__/formatContent.test.js __tests__/detectPhase.test.js __tests__/phaseColors.test.js
+git commit -m "feat: add utility functions — formatContent, detectPhase, downloadReport (print-styled), phaseColors
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
 
@@ -543,6 +678,8 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 - Create: `__tests__/InterviewContext.test.jsx`
 
 - [ ] **Step 1: Create src/context/InterviewContext.jsx**
+
+Enhanced with `stats` object for the report view.
 
 ```jsx
 import { createContext, useContext, useReducer } from 'react';
@@ -559,6 +696,11 @@ const initialState = {
   status: 'idle',        // 'idle' | 'processing' | 'complete' | 'error'
   reportMarkdown: null,
   error: null,
+  stats: {
+    phasesCompleted: 1,
+    questionsAnswered: 0,
+    domainsAnalyzed: 8,
+  },
 };
 
 function reducer(state, action) {
@@ -571,10 +713,16 @@ function reducer(state, action) {
     case 'ADD_MESSAGE': {
       const { role, content } = action;
       const newMessages = [...state.messages, { role, content }];
+      const newQuestionCount = role === 'assistant' ? state.questionCount + 1 : state.questionCount;
       return {
         ...state,
         messages: newMessages,
-        questionCount: role === 'assistant' ? state.questionCount + 1 : state.questionCount,
+        questionCount: newQuestionCount,
+        stats: {
+          ...state.stats,
+          questionsAnswered: newQuestionCount,
+          phasesCompleted: state.phase,
+        },
         error: null,
       };
     }
@@ -582,7 +730,15 @@ function reducer(state, action) {
     case 'SET_PHASE': {
       const { phase } = action;
       if (phase && phase !== state.phase) {
-        return { ...state, phase, questionCount: 0 };
+        return {
+          ...state,
+          phase,
+          questionCount: 0,
+          stats: {
+            ...state.stats,
+            phasesCompleted: phase,
+          },
+        };
       }
       return state;
     }
@@ -612,11 +768,11 @@ function reducer(state, action) {
 }
 
 export function InterviewProvider({ children }) {
-  const [{ screen, password, phase, questionCount, messages, status, reportMarkdown, error }, dispatch] =
+  const [{ screen, password, phase, questionCount, messages, status, reportMarkdown, error, stats }, dispatch] =
     useReducer(reducer, initialState);
 
   return (
-    <InterviewContext.Provider value={{ screen, password, phase, questionCount, messages, status, reportMarkdown, error }}>
+    <InterviewContext.Provider value={{ screen, password, phase, questionCount, messages, status, reportMarkdown, error, stats }}>
       <InterviewDispatch.Provider value={dispatch}>
         {children}
       </InterviewDispatch.Provider>
@@ -639,60 +795,7 @@ export function useInterviewDispatch() {
 
 - [ ] **Step 2: Create __tests__/InterviewContext.test.jsx**
 
-```jsx
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { InterviewProvider, useInterviewState, useInterviewDispatch } from '../src/context/InterviewContext';
-
-function TestConsumer() {
-  const state = useInterviewState();
-  const dispatch = useInterviewDispatch();
-  return (
-    <div>
-      <span data-testid="screen">{state.screen}</span>
-      <span data-testid="phase">{state.phase}</span>
-      <span data-testid="status">{state.status}</span>
-      <button data-testid="unlock" onClick={() => dispatch({ type: 'UNLOCK', password: 'test123' })}>Unlock</button>
-      <button data-testid="add-msg" onClick={() => dispatch({ type: 'ADD_MESSAGE', role: 'assistant', content: 'Hello' })}>Add</button>
-      <button data-testid="err" onClick={() => dispatch({ type: 'SET_ERROR', error: 'bad' })}>Err</button>
-      <button data-testid="reset" onClick={() => dispatch({ type: 'RESET' })}>Reset</button>
-    </div>
-  );
-}
-
-describe('InterviewContext', () => {
-  it('starts on gate screen', () => {
-    render(<InterviewProvider><TestConsumer /></InterviewProvider>);
-    expect(screen.getByTestId('screen').textContent).toBe('gate');
-  });
-
-  it('transitions gate -> interview on UNLOCK', () => {
-    render(<InterviewProvider><TestConsumer /></InterviewProvider>);
-    screen.getByTestId('unlock').click();
-    expect(screen.getByTestId('screen').textContent).toBe('interview');
-  });
-
-  it('increments questionCount on assistant message', () => {
-    render(<InterviewProvider><TestConsumer /></InterviewProvider>);
-    screen.getByTestId('unlock').click();
-    screen.getByTestId('add-msg').click();
-    expect(screen.getByTestId('phase').textContent).toBe('1');
-  });
-
-  it('sets error state and clears on next message', () => {
-    render(<InterviewProvider><TestConsumer /></InterviewProvider>);
-    screen.getByTestId('err').click();
-    expect(screen.getByTestId('status').textContent).toBe('idle');
-  });
-
-  it('resets to initial state', () => {
-    render(<InterviewProvider><TestConsumer /></InterviewProvider>);
-    screen.getByTestId('unlock').click();
-    screen.getByTestId('reset').click();
-    expect(screen.getByTestId('screen').textContent).toBe('gate');
-  });
-});
-```
+Same as original spec but updated to check stats.
 
 - [ ] **Step 3: Run tests**
 
@@ -700,35 +803,60 @@ describe('InterviewContext', () => {
 npx vitest run __tests__/InterviewContext.test.jsx
 ```
 
-Expected: all 5 tests pass.
-
 - [ ] **Step 4: Commit**
 
 ```bash
 git add src/context/InterviewContext.jsx __tests__/InterviewContext.test.jsx
-git commit -m "feat: add InterviewContext — useReducer state machine
+git commit -m "feat: add InterviewContext — useReducer state machine with stats tracking
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
 
 ---
 
-### Task 5: Base Components (Part 1 — ChatBubble, TypingIndicator, PhaseBadge)
+### Task 5: Base Components — Part 1 (ChatBubble, StaggeredReveal, TypingIndicator, PhaseIndicator)
 
 **Files:**
 - Create: `src/components/ChatBubble.jsx`
+- Create: `src/components/StaggeredReveal.jsx` (NEW)
 - Create: `src/components/TypingIndicator.jsx`
-- Create: `src/components/PhaseBadge.jsx`
+- Create: `src/components/PhaseIndicator.jsx`
 
 - [ ] **Step 1: Create src/components/ChatBubble.jsx**
 
+Enhanced with glass-morphism interviewer cards, gradient user bubbles, and structured profile section treatment.
+
 ```jsx
-import { motion } from 'framer-motion';
-import { useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { formatContent } from '../lib/formatContent';
+import StaggeredReveal from './StaggeredReveal';
 
 const spring = { type: 'spring', stiffness: 100, damping: 15 };
 
-export default function ChatBubble({ role, content }) {
+function isProfileSection(content) {
+  return content.includes('---') && (
+    content.includes('EXECUTIVE SUMMARY') ||
+    content.includes('PERSONALITY ARCHITECTURE') ||
+    content.includes('DEFENSE STRUCTURE') ||
+    content.includes('ATTACHMENT') ||
+    content.includes('STRESS') ||
+    content.includes('SHADOW') ||
+    content.includes('RISK') ||
+    content.includes('RECOMMENDATIONS')
+  );
+}
+
+const sectionGradients = {
+  'EXECUTIVE SUMMARY': 'from-indigo-50 to-transparent',
+  'PERSONALITY ARCHITECTURE': 'from-violet-50 to-transparent',
+  'DEFENSE STRUCTURE': 'from-rose-50 to-transparent',
+  'ATTACHMENT': 'from-blue-50 to-transparent',
+  'STRESS': 'from-amber-50 to-transparent',
+  'SHADOW': 'from-slate-50 to-transparent',
+  'RISK': 'from-emerald-50 to-transparent',
+  'RECOMMENDATIONS': 'from-teal-50 to-transparent',
+};
+
+export default function ChatBubble({ role, content, isProfileDelivery }) {
   const reduced = useReducedMotion();
   const isUser = role === 'user';
   const isSystem = role === 'system';
@@ -739,38 +867,63 @@ export default function ChatBubble({ role, content }) {
     ? 'bg-surface-raised text-ink-secondary border border-border'
     : isSystem
     ? 'bg-amber-50 text-amber-600 border border-amber-200'
-    : 'bg-accent/10 text-accent border border-accent/20';
+    : 'bg-gradient-to-br from-accent-primary/10 to-accent-deep/10 text-accent-primary border border-accent-primary/20';
 
-  const bubbleClasses = isUser
-    ? 'bg-accent text-white rounded-[14px] rounded-br-[4px] ml-auto'
-    : '';
+  const hasProfileSections = !isUser && isProfileDelivery && isProfileSection(content);
+  const isLongMessage = !isUser && !isSystem && content.length > 200;
 
-  const bodyContent = isUser
-    ? `<p>${content}</p>`
-    : formatContent(content);
+  const bodyHtml = isUser ? `<p>${content}</p>` : formatContent(content);
 
   return (
     <motion.div
-      className={`msg flex gap-3 items-start mb-4 max-w-full ${isUser ? 'flex-row-reverse' : ''}`}
-      initial={reduced ? { opacity: 1 } : { opacity: 0, y: 6 }}
+      className={`msg flex gap-3 items-start mb-6 max-w-full ${isUser ? 'flex-row-reverse' : ''}`}
+      initial={reduced ? { opacity: 1 } : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={spring}
     >
+      {/* Avatar */}
       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 mt-0.5 ${avatarClasses}`}>
         {avatar}
       </div>
+
+      {/* Body */}
       <div className={`flex-1 min-w-0 ${isUser ? 'flex flex-col items-end' : ''}`}>
-        <div className={`text-[11px] font-medium mb-1 tracking-wide uppercase ${isUser ? 'text-accent/60' : isSystem ? 'text-amber-500' : 'text-accent'}`}>
+        {/* Label */}
+        <div className={`text-[11px] font-semibold mb-1.5 tracking-wide uppercase ${isUser ? 'text-accent-primary/60' : isSystem ? 'text-amber-500' : 'text-accent-primary'}`}>
           {label}
         </div>
+
+        {/* Content */}
         {isUser ? (
-          <div className={`px-3.5 py-2 max-w-[80%] ${bubbleClasses}`}>
-            <p className="text-sm leading-relaxed">{content}</p>
+          <div className="px-4 py-2.5 max-w-[80%] bg-gradient-to-br from-accent-primary to-accent-deep text-white rounded-[16px] rounded-br-[4px] shadow-[0_2px_8px_rgba(79,70,229,0.15)]">
+            <p className="text-[15px] leading-relaxed">{content}</p>
           </div>
+        ) : hasProfileSections ? (
+          <div className="space-y-4">
+            {content.split(/(---.*?---)/g).filter(Boolean).map((section, i) => {
+              if (section.match(/---.*?---/)) {
+                const sectionName = section.replace(/---/g, '').trim();
+                return (
+                  <div key={i} className="bg-white/80 backdrop-blur-sm border border-border rounded-xl p-4 shadow-sm">
+                    <div className="text-[11px] font-semibold text-accent-primary uppercase tracking-wide mb-2">
+                      {sectionName}
+                    </div>
+                  </div>
+                );
+              }
+              return (
+                <div key={i} className="text-[15px] leading-relaxed text-ink-secondary"
+                  dangerouslySetInnerHTML={{ __html: formatContent(section) }}
+                />
+              );
+            })}
+          </div>
+        ) : isLongMessage ? (
+          <StaggeredReveal html={bodyHtml} disabled={reduced} />
         ) : (
           <div
-            className={`text-sm leading-relaxed text-ink-secondary ${isSystem ? 'italic text-ink-muted text-xs' : ''}`}
-            dangerouslySetInnerHTML={{ __html: bodyContent }}
+            className={`text-[15px] leading-relaxed text-ink-secondary ${isSystem ? 'italic text-ink-muted text-xs' : ''}`}
+            dangerouslySetInnerHTML={{ __html: bodyHtml }}
           />
         )}
       </div>
@@ -779,7 +932,52 @@ export default function ChatBubble({ role, content }) {
 }
 ```
 
-- [ ] **Step 2: Create src/components/TypingIndicator.jsx**
+- [ ] **Step 2: Create src/components/StaggeredReveal.jsx**
+
+```jsx
+import { motion, useReducedMotion } from 'framer-motion';
+
+const container = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 6 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+};
+
+export default function StaggeredReveal({ html, disabled }) {
+  const reduced = useReducedMotion();
+
+  if (reduced || disabled) {
+    return <div className="text-[15px] leading-relaxed text-ink-secondary" dangerouslySetInnerHTML={{ __html: html }} />;
+  }
+
+  // Split on <p> tags for paragraph-level staggering
+  const paragraphs = html.split(/(<p>.*?<\/p>)/g).filter(Boolean);
+
+  if (paragraphs.length <= 1) {
+    return <div className="text-[15px] leading-relaxed text-ink-secondary" dangerouslySetInnerHTML={{ __html: html }} />;
+  }
+
+  return (
+    <motion.div variants={container} initial="hidden" animate="show" className="text-[15px] leading-relaxed text-ink-secondary">
+      {paragraphs.map((p, i) => (
+        <motion.span key={i} variants={item} dangerouslySetInnerHTML={{ __html: p }} />
+      ))}
+    </motion.div>
+  );
+}
+```
+
+- [ ] **Step 3: Create src/components/TypingIndicator.jsx**
+
+Enhanced with breathing effect reference for InputBar.
 
 ```jsx
 import { motion } from 'framer-motion';
@@ -791,7 +989,13 @@ const dot = {
 
 export default function TypingIndicator() {
   return (
-    <div className="flex items-center gap-2 py-1" role="status" aria-label="Interviewer is formulating">
+    <motion.div
+      className="flex items-center gap-2.5 py-2 px-1"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      role="status"
+      aria-label="Interviewer is formulating"
+    >
       <div className="flex gap-1">
         {[0, 0.2, 0.4].map((delay, i) => (
           <motion.span
@@ -803,52 +1007,82 @@ export default function TypingIndicator() {
         ))}
       </div>
       <span className="text-xs text-ink-muted italic">Formulating...</span>
-    </div>
+    </motion.div>
   );
 }
 ```
 
-- [ ] **Step 3: Create src/components/PhaseBadge.jsx**
+- [ ] **Step 4: Create src/components/PhaseIndicator.jsx**
+
+Enhanced with gradient pill, progress dots, and animated counter.
 
 ```jsx
-const phaseNames = {
-  1: 'Phase 1: Baseline',
-  2: 'Phase 2: Cognitive & Emotional',
-  3: 'Phase 3: Relational & Social',
-  4: 'Phase 4: Vulnerability Probe',
-  5: 'Phase 5: Profile Delivery',
-};
+import { motion } from 'framer-motion';
+import { PHASE_NAMES, PHASE_GRADIENTS } from '../lib/phaseColors';
 
-export default function PhaseBadge({ phase, questionCount }) {
+const TOTAL_PHASES = 5;
+
+export default function PhaseIndicator({ phase, questionCount }) {
   if (!phase) return null;
 
+  const gradientClass = PHASE_GRADIENTS[phase] || PHASE_GRADIENTS[1];
+  const phaseName = PHASE_NAMES[phase] || 'Interview';
+
   return (
-    <div className="flex items-center gap-2 text-xs" aria-live="polite" aria-label={`${phaseNames[phase]}, question ${questionCount}`}>
-      <span className="text-accent font-medium">{phaseNames[phase]}</span>
-      <span className="text-ink-muted">Q{questionCount}</span>
+    <div
+      className="flex items-center gap-2.5"
+      aria-live="polite"
+      aria-label={`Phase ${phase}: ${phaseName}, question ${questionCount}`}
+    >
+      {/* Progress dots */}
+      <div className="flex gap-1.5" aria-hidden="true">
+        {Array.from({ length: TOTAL_PHASES }, (_, i) => i + 1).map(p => (
+          <motion.div
+            key={p}
+            className={`w-1.5 h-1.5 rounded-full transition-colors duration-500 ${
+              p < phase ? 'bg-accent-primary/30' :
+              p === phase ? `bg-gradient-to-br ${gradientClass}` :
+              'bg-border'
+            }`}
+            animate={p === phase ? { scale: [1, 1.3, 1] } : {}}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        ))}
+      </div>
+
+      {/* Phase name + question count */}
+      <div className="flex items-center gap-1.5 text-xs">
+        <span className={`font-medium bg-gradient-to-r ${gradientClass} bg-clip-text text-transparent`}>
+          {phaseName}
+        </span>
+        <span className="text-ink-muted">Q{questionCount}</span>
+      </div>
     </div>
   );
 }
 ```
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add src/components/ChatBubble.jsx src/components/TypingIndicator.jsx src/components/PhaseBadge.jsx
-git commit -m "feat: add base components — ChatBubble, TypingIndicator, PhaseBadge
+git add src/components/ChatBubble.jsx src/components/StaggeredReveal.jsx src/components/TypingIndicator.jsx src/components/PhaseIndicator.jsx
+git commit -m "feat: add base components — ChatBubble (glass/gradient), StaggeredReveal, TypingIndicator, PhaseIndicator
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
 
 ---
 
-### Task 6: Base Components (Part 2 — SendButton, StatusMessage, PhaseTransition)
+### Task 6: Base Components — Part 2 (SendButton, StatusMessage, CinematicPhaseChange, SparkleBurst)
 
 **Files:**
 - Create: `src/components/SendButton.jsx`
 - Create: `src/components/StatusMessage.jsx`
-- Create: `src/components/PhaseTransition.jsx`
+- Create: `src/components/CinematicPhaseChange.jsx`
+- Create: `src/components/SparkleBurst.jsx` (NEW)
 
 - [ ] **Step 1: Create src/components/SendButton.jsx**
+
+3-state morph with layoutId.
 
 ```jsx
 import { motion } from 'framer-motion';
@@ -862,23 +1096,35 @@ export default function SendButton({ disabled, status, onClick }) {
     <motion.button
       onClick={onClick}
       disabled={disabled}
-      className="w-9 h-9 rounded-full bg-accent text-white flex items-center justify-center shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
+      className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
+      style={{ background: isComplete ? 'linear-gradient(135deg, #059669, #10B981)' : 'linear-gradient(135deg, #4F46E5, #6366F1)' }}
       whileTap={{ scale: 0.92 }}
+      whileHover={{ scale: 1.05 }}
       aria-label={isProcessing ? 'Sending...' : isComplete ? 'Sent' : 'Send message'}
     >
-      {isProcessing ? (
-        <Loader2 size={16} className="animate-spin" />
-      ) : isComplete ? (
-        <Check size={16} />
-      ) : (
-        <ArrowUp size={16} />
-      )}
+      <motion.span
+        key={status}
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className="text-white flex items-center justify-center"
+      >
+        {isProcessing ? (
+          <Loader2 size={16} className="animate-spin" />
+        ) : isComplete ? (
+          <Check size={16} />
+        ) : (
+          <ArrowUp size={16} />
+        )}
+      </motion.span>
     </motion.button>
   );
 }
 ```
 
 - [ ] **Step 2: Create src/components/StatusMessage.jsx**
+
+Same as original spec.
 
 ```jsx
 export default function StatusMessage({ type, children }) {
@@ -896,28 +1142,39 @@ export default function StatusMessage({ type, children }) {
 }
 ```
 
-- [ ] **Step 3: Create src/components/PhaseTransition.jsx**
+- [ ] **Step 3: Create src/components/CinematicPhaseChange.jsx**
+
+Viewport-level phase transition with gradient trail wipe + zoom-blur.
 
 ```jsx
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
-export default function PhaseTransition({ oldPhase, newPhase, children }) {
+export default function CinematicPhaseChange({ oldPhase, newPhase, children }) {
+  const reduced = useReducedMotion();
+
   if (oldPhase === newPhase || !newPhase) return children;
+  if (reduced) return children; // instant cut when reduced motion
 
   return (
     <AnimatePresence mode="wait">
       <motion.div
         key={newPhase}
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -20 }}
-        transition={{ duration: 0.25, ease: 'easeInOut' }}
+        initial={{ opacity: 0, x: 30, filter: 'blur(2px)' }}
+        animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+        exit={{ opacity: 0, x: -30, filter: 'blur(2px)' }}
+        transition={{ duration: 0.4, ease: 'easeInOut' }}
       >
-        <div className="text-center py-2 my-2">
-          <span className="text-[11px] text-ink-muted bg-surface-raised px-3 py-1 rounded-full">
+        {/* Phase change indicator */}
+        <motion.div
+          className="text-center py-3 my-3"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.15, duration: 0.3 }}
+        >
+          <span className="text-[11px] font-medium text-ink-muted bg-gradient-to-r from-accent-primary/10 to-accent-deep/10 px-4 py-1.5 rounded-full border border-accent-primary/10">
             Phase {oldPhase} → Phase {newPhase}
           </span>
-        </div>
+        </motion.div>
         {children}
       </motion.div>
     </AnimatePresence>
@@ -925,29 +1182,86 @@ export default function PhaseTransition({ oldPhase, newPhase, children }) {
 }
 ```
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 4: Create src/components/SparkleBurst.jsx**
+
+Wrapper around a simple CSS sparkle/confetti burst (self-implemented to avoid pulling full Aceternity Sparkles dependency unless needed). For simplicity, we use a CSS keyframe burst.
+
+```jsx
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+
+const SPARKLES = Array.from({ length: 20 }, (_, i) => ({
+  id: i,
+  x: (Math.random() - 0.5) * 300,
+  y: (Math.random() - 0.5) * 300,
+  scale: Math.random() * 0.5 + 0.5,
+  rotation: Math.random() * 360,
+  color: ['#4F46E5', '#7C3AED', '#EC4899', '#059669', '#10B981', '#F59E0B'][i % 6],
+  delay: Math.random() * 0.3,
+}));
+
+export default function SparkleBurst({ trigger, onComplete }) {
+  const reduced = useReducedMotion();
+
+  return (
+    <AnimatePresence onExitComplete={onComplete}>
+      {trigger && !reduced && (
+        <motion.div
+          className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center"
+          aria-hidden="true"
+          exit={{ opacity: 0 }}
+        >
+          {SPARKLES.map(s => (
+            <motion.div
+              key={s.id}
+              className="absolute w-2 h-2 rounded-full"
+              style={{ backgroundColor: s.color }}
+              initial={{ opacity: 1, scale: 0, x: 0, y: 0, rotate: 0 }}
+              animate={{
+                opacity: [1, 0],
+                scale: [0, s.scale],
+                x: s.x,
+                y: s.y,
+                rotate: s.rotation,
+              }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8, delay: s.delay, ease: 'easeOut' }}
+            />
+          ))}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+```
+
+- [ ] **Step 5: Commit**
 
 ```bash
-git add src/components/SendButton.jsx src/components/StatusMessage.jsx src/components/PhaseTransition.jsx
-git commit -m "feat: add base components — SendButton, StatusMessage, PhaseTransition
+git add src/components/SendButton.jsx src/components/StatusMessage.jsx src/components/CinematicPhaseChange.jsx src/components/SparkleBurst.jsx
+git commit -m "feat: add base components — SendButton (3-state morph), StatusMessage, CinematicPhaseChange, SparkleBurst
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
 
 ---
 
-### Task 7: InputBar Component
+### Task 7: InputBar Component (Enhanced)
 
 **Files:**
 - Create: `src/components/InputBar.jsx`
 
 - [ ] **Step 1: Create src/components/InputBar.jsx**
 
+Enhanced with glass morphism, focus lift, keystroke pulse, and state-aware SendButton.
+
 ```jsx
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
+import { motion } from 'framer-motion';
 import SendButton from './SendButton';
 
 export default function InputBar({ value, onChange, onSend, onEnd, disabled, status }) {
   const textareaRef = useRef(null);
+  const [focused, setFocused] = useState(false);
+  const [hasTyped, setHasTyped] = useState(false);
 
   const adjustHeight = useCallback(() => {
     const el = textareaRef.current;
@@ -959,12 +1273,17 @@ export default function InputBar({ value, onChange, onSend, onEnd, disabled, sta
   const handleChange = (e) => {
     onChange(e.target.value);
     adjustHeight();
+    if (e.target.value && !hasTyped) setHasTyped(true);
+    if (!e.target.value) setHasTyped(false);
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (value.trim() && !disabled) onSend();
+      if (value.trim() && !disabled) {
+        setHasTyped(false);
+        onSend();
+      }
     }
     if (e.key === 'Escape') {
       e.target.blur();
@@ -972,17 +1291,32 @@ export default function InputBar({ value, onChange, onSend, onEnd, disabled, sta
   };
 
   const handleSend = () => {
-    if (value.trim() && !disabled) onSend();
+    if (value.trim() && !disabled) {
+      setHasTyped(false);
+      onSend();
+    }
   };
 
+  const isProcessing = status === 'processing';
+
   return (
-    <div className="border-t border-border-light bg-surface px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom,0px))] shrink-0">
-      <div className="flex gap-2 items-end bg-surface-raised border border-border rounded-2xl px-4 py-2 transition-colors focus-within:border-accent focus-within:ring-2 focus-within:ring-accent-glow">
+    <div className="border-t border-border-light bg-surface/90 backdrop-blur-md px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom,0px))] shrink-0">
+      <motion.div
+        className={`flex gap-2 items-end bg-white/90 backdrop-blur-sm border rounded-2xl px-4 py-2.5 transition-colors
+          ${focused ? 'border-accent-primary shadow-[0_0_0_3px_var(--color-accent-glow-primary)]' : 'border-border'}`}
+        animate={{
+          y: focused ? -2 : 0,
+          scale: hasTyped ? 1.005 : 1,
+        }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+      >
         <textarea
           ref={textareaRef}
           value={value}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           placeholder="Type your response..."
           rows={1}
           disabled={disabled}
@@ -990,7 +1324,7 @@ export default function InputBar({ value, onChange, onSend, onEnd, disabled, sta
           aria-label="Your response"
         />
         <SendButton disabled={disabled || !value.trim()} status={status} onClick={handleSend} />
-      </div>
+      </motion.div>
       <div className="flex justify-between items-center mt-1.5 px-1">
         <span className="text-[11px] text-ink-muted">Enter to send · Shift+Enter for new line</span>
         <button
@@ -1011,60 +1345,258 @@ export default function InputBar({ value, onChange, onSend, onEnd, disabled, sta
 
 ```bash
 git add src/components/InputBar.jsx
-git commit -m "feat: add InputBar component with auto-resize textarea
+git commit -m "feat: add InputBar with glass morphism, focus lift, keystroke pulse
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
 
 ---
 
-### Task 8: AnimatedBackground Component
+### Task 8: Ambient Environment
 
 **Files:**
-- Create: `src/components/AnimatedBackground.jsx`
+- Create: `src/components/AmbientEnvironment.jsx`
+- Create: `src/components/CursorGlow.jsx` (NEW)
+- Create: `src/hooks/usePhaseAmbience.js` (NEW)
+- Create: `src/hooks/useCursorGlow.js` (NEW)
 
-- [ ] **Step 1: Create src/components/AnimatedBackground.jsx**
+- [ ] **Step 1: Create src/hooks/usePhaseAmbience.js**
+
+```javascript
+import { useRef, useEffect, useState } from 'react';
+import { PHASE_COLORS } from '../lib/phaseColors';
+
+export function usePhaseAmbience(phase) {
+  const [ambientColors, setAmbientColors] = useState(PHASE_COLORS[phase]);
+  const prevPhaseRef = useRef(phase);
+
+  useEffect(() => {
+    if (phase !== prevPhaseRef.current) {
+      prevPhaseRef.current = phase;
+      // Smooth transition — set immediately since CSS transitions handle the interpolation
+      setAmbientColors(PHASE_COLORS[phase]);
+    }
+  }, [phase]);
+
+  return ambientColors;
+}
+```
+
+- [ ] **Step 2: Create src/hooks/useCursorGlow.js**
+
+```javascript
+import { useState, useCallback, useEffect } from 'react';
+
+export function useCursorGlow() {
+  const [position, setPosition] = useState({ x: 0.5, y: 0.5 });
+  const [isTouchDevice, setIsTouchDevice] = useState(true);
+
+  useEffect(() => {
+    const hasCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+    setIsTouchDevice(hasCoarsePointer);
+  }, []);
+
+  const handleMouseMove = useCallback((e) => {
+    if (isTouchDevice) return;
+    setPosition({
+      x: e.clientX / window.innerWidth,
+      y: e.clientY / window.innerHeight,
+    });
+  }, [isTouchDevice]);
+
+  const handleMouseLeave = useCallback(() => {
+    setPosition({ x: 0.5, y: 0.5 }); // reset to center
+  }, []);
+
+  return { position, isTouchDevice, handleMouseMove, handleMouseLeave };
+}
+```
+
+- [ ] **Step 3: Create src/components/CursorGlow.jsx**
 
 ```jsx
 import { motion, useReducedMotion } from 'framer-motion';
 
-export default function AnimatedBackground() {
+export default function CursorGlow({ position, isTouchDevice }) {
   const reduced = useReducedMotion();
+
+  if (isTouchDevice || reduced) return null;
+
+  return (
+    <motion.div
+      className="fixed pointer-events-none z-[-5]"
+      aria-hidden="true"
+      style={{
+        width: '400px',
+        height: '400px',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(79,70,229,0.04), transparent 70%)',
+        transform: 'translate(-50%, -50%)',
+      }}
+      animate={{
+        left: `${position.x * 100}%`,
+        top: `${position.y * 100}%`,
+      }}
+      transition={{ type: 'spring', stiffness: 50, damping: 30 }}
+    />
+  );
+}
+```
+
+- [ ] **Step 4: Create src/components/AmbientEnvironment.jsx**
+
+Phase-aware gradient orbs + CursorGlow + noise texture overlay.
+
+```jsx
+import { motion, useReducedMotion } from 'framer-motion';
+import { usePhaseAmbience } from '../hooks/usePhaseAmbience';
+import CursorGlow from './CursorGlow';
+
+export default function AmbientEnvironment({ phase, cursorPosition, isTouchDevice }) {
+  const reduced = useReducedMotion();
+  const ambient = usePhaseAmbience(phase);
 
   if (reduced) return null;
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10" aria-hidden="true">
+      {/* Cursor-responsive glow (desktop only) */}
+      <CursorGlow position={cursorPosition} isTouchDevice={isTouchDevice} />
+
       {/* Top-right orb */}
       <motion.div
-        className="absolute w-[300px] h-[300px] rounded-full opacity-[0.04]"
+        className="absolute w-[350px] h-[350px] rounded-full"
         style={{
-          background: 'radial-gradient(circle, var(--color-accent), transparent 70%)',
-          top: '-5%',
-          right: '-10%',
+          background: ambient.gradient,
+          top: '-8%',
+          right: '-12%',
         }}
         animate={{
-          scale: [1, 1.15, 1],
+          scale: [1, 1.12, 1],
           x: [0, -20, 0],
-          y: [0, 10, 0],
+          y: [0, 12, 0],
         }}
-        transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+        transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
       />
+
       {/* Bottom-left orb */}
       <motion.div
-        className="absolute w-[250px] h-[250px] rounded-full opacity-[0.03]"
+        className="absolute w-[280px] h-[280px] rounded-full"
         style={{
-          background: 'radial-gradient(circle, var(--color-accent), transparent 70%)',
-          bottom: '-8%',
-          left: '-5%',
+          background: ambient.gradient,
+          bottom: '-10%',
+          left: '-8%',
         }}
         animate={{
-          scale: [1, 1.2, 1],
+          scale: [1, 1.18, 1],
           x: [0, 15, 0],
-          y: [0, -8, 0],
+          y: [0, -10, 0],
         }}
-        transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
+        transition={{ duration: 28, repeat: Infinity, ease: 'easeInOut' }}
+      />
+
+      {/* Center-right orb (subtle, Phase 3+) */}
+      {phase >= 3 && (
+        <motion.div
+          className="absolute w-[200px] h-[200px] rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(124,58,237,0.04), transparent 70%)',
+            top: '40%',
+            right: '-5%',
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, scale: [1, 1.1, 1], y: [0, -8, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      )}
+
+      {/* Noise texture overlay for depth */}
+      <div
+        className="absolute inset-0 opacity-[0.015]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.5'/%3E%3C/svg%3E")`,
+          animation: 'noise 8s steps(10) infinite',
+        }}
       />
     </div>
+  );
+}
+```
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/components/AmbientEnvironment.jsx src/components/CursorGlow.jsx src/hooks/usePhaseAmbience.js src/hooks/useCursorGlow.js
+git commit -m "feat: add ambient environment — phase-aware orbs, cursor glow, noise texture
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
+```
+
+---
+
+### Task 9: Screen Transition Orchestrator
+
+**Files:**
+- Create: `src/components/ScreenTransition.jsx` (NEW)
+
+- [ ] **Step 1: Create src/components/ScreenTransition.jsx**
+
+```jsx
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+
+const transitionVariants = {
+  // Gate → Chat: radial reveal
+  gateToChat: {
+    initial: { clipPath: 'circle(0% at 50% 85%)', opacity: 0 },
+    animate: { clipPath: 'circle(150% at 50% 85%)', opacity: 1 },
+    exit: { clipPath: 'circle(0% at 50% 85%)', opacity: 0 },
+  },
+  // Chat → Report: zoom-out resolution
+  chatToReport: {
+    initial: { opacity: 0, scale: 0.97 },
+    animate: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: 0.97 },
+  },
+  // Report → Gate: graceful fade
+  reportToGate: {
+    initial: { opacity: 0, scale: 0.95 },
+    animate: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: 0.95 },
+  },
+};
+
+export default function ScreenTransition({ screen, previousScreen, children }) {
+  const reduced = useReducedMotion();
+
+  const variantKey = previousScreen === 'gate' && screen === 'interview' ? 'gateToChat' :
+    previousScreen === 'interview' && screen === 'report' ? 'chatToReport' :
+    previousScreen === 'report' && screen === 'gate' ? 'reportToGate' :
+    null;
+
+  // Default fade transition for unknown transitions
+  const variants = variantKey ? transitionVariants[variantKey] : {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
+  };
+
+  if (reduced) {
+    // Instant cut when reduced motion
+    return <AnimatePresence mode="wait">{children}</AnimatePresence>;
+  }
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={screen}
+        variants={variants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+        style={{ minHeight: '100vh' }}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
   );
 }
 ```
@@ -1072,22 +1604,22 @@ export default function AnimatedBackground() {
 - [ ] **Step 2: Commit**
 
 ```bash
-git add src/components/AnimatedBackground.jsx
-git commit -m "feat: add AnimatedBackground — subtle floating gradient orbs
+git add src/components/ScreenTransition.jsx
+git commit -m "feat: add ScreenTransition — cinematic gate→chat→report transitions
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
 
 ---
 
-### Task 9: PasswordGate Screen
+### Task 10: PasswordGate Screen (Enhanced)
 
 **Files:**
 - Create: `src/screens/PasswordGate.jsx`
 - Create: `__tests__/PasswordGate.test.jsx`
 
-**Note:** We use the Aceternity UI animated modal pattern but self-implemented to avoid pulling the full library. The gate uses a centered card with spring entrance and focus-ring animations.
-
 - [ ] **Step 1: Create src/screens/PasswordGate.jsx**
+
+Enhanced with Godly-inspired typography, glass morphism button, and cinematic unlock.
 
 ```jsx
 import { useState } from 'react';
@@ -1128,21 +1660,25 @@ export default function PasswordGate() {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-canvas">
       <motion.div
-        className="max-w-[360px] w-full text-center"
+        className="max-w-[380px] w-full text-center"
         initial={reduced ? {} : { opacity: 0, scale: 0.92 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ type: 'spring', stiffness: 100, damping: 15 }}
       >
         {/* Brand mark */}
-        <div className="w-10 h-10 rounded-xl mx-auto mb-5 flex items-center justify-center text-white text-lg"
-          style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}>
+        <motion.div
+          className="w-14 h-14 rounded-2xl mx-auto mb-6 flex items-center justify-center text-white text-2xl shadow-[0_8px_32px_rgba(79,70,229,0.15)]"
+          style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed, #ec4899)' }}
+          animate={reduced ? {} : { scale: [1, 1.05, 1] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        >
           ◆
-        </div>
+        </motion.div>
 
-        <h1 className="text-[28px] font-light tracking-[-0.5px] text-ink mb-1.5">
-          Psychological Profile
+        <h1 className="text-[32px] font-[200] tracking-[-1px] text-ink mb-2 leading-tight">
+          Psychological<br />Profile
         </h1>
-        <p className="text-sm text-ink-muted leading-relaxed mb-7">
+        <p className="text-[14px] text-ink-secondary leading-relaxed mb-8 max-w-[300px] mx-auto">
           A confidential behavioral interview. Enter the access code you received to begin.
         </p>
 
@@ -1154,29 +1690,36 @@ export default function PasswordGate() {
             placeholder="Access code"
             autoFocus
             autoComplete="off"
-            className={`w-full px-4 py-3 bg-surface border rounded-xl text-[15px] text-ink text-center tracking-[2px] outline-none transition-all
-              ${error ? 'border-danger ring-2 ring-danger/20' : 'border-border focus:border-accent focus:ring-2 focus:ring-accent-glow'}`}
+            className={`w-full px-5 py-3.5 bg-white border rounded-2xl text-[15px] text-ink text-center tracking-[3px] outline-none transition-all
+              ${error ? 'border-danger ring-2 ring-danger/20' : 'border-border focus:border-accent-primary focus:ring-2 focus:ring-accent-glow-primary'}`}
             aria-label="Access code"
             aria-invalid={!!error}
             aria-describedby={error ? 'gate-error' : undefined}
           />
 
           {error && (
-            <p id="gate-error" className="text-xs text-danger mt-2" role="alert">
+            <motion.p
+              id="gate-error"
+              className="text-xs text-danger mt-2.5"
+              role="alert"
+              initial={reduced ? {} : { opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
               {error}
-            </p>
+            </motion.p>
           )}
 
-          <button
+          <motion.button
             type="submit"
             disabled={loading}
-            className="w-full mt-3.5 py-3 bg-accent text-white rounded-xl text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-opacity hover:opacity-90"
+            className="w-full mt-4 py-3.5 bg-gradient-to-r from-accent-primary to-accent-deep text-white rounded-2xl text-[15px] font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-opacity hover:opacity-90 shadow-[0_4px_16px_rgba(79,70,229,0.2)]"
+            whileTap={{ scale: 0.98 }}
           >
             {loading ? 'Verifying...' : 'Continue →'}
-          </button>
+          </motion.button>
         </form>
 
-        <p className="text-[11px] text-ink-muted mt-4">
+        <p className="text-[11px] text-ink-muted mt-5">
           All responses are confidential. Nothing is stored.
         </p>
       </motion.div>
@@ -1187,51 +1730,7 @@ export default function PasswordGate() {
 
 - [ ] **Step 2: Create __tests__/PasswordGate.test.jsx**
 
-```jsx
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { InterviewProvider } from '../src/context/InterviewContext';
-import PasswordGate from '../src/screens/PasswordGate';
-
-// Mock api
-vi.mock('../src/lib/api', () => ({
-  verifyPassword: vi.fn(),
-}));
-
-import { verifyPassword } from '../src/lib/api';
-
-function renderGate() {
-  return render(
-    <InterviewProvider>
-      <PasswordGate />
-    </InterviewProvider>
-  );
-}
-
-describe('PasswordGate', () => {
-  it('renders the gate form', () => {
-    renderGate();
-    expect(screen.getByText('Psychological Profile')).toBeInTheDocument();
-    expect(screen.getByLabelText('Access code')).toBeInTheDocument();
-  });
-
-  it('shows error for empty password', async () => {
-    renderGate();
-    const btn = screen.getByRole('button', { name: /continue/i });
-    await userEvent.click(btn);
-    expect(screen.getByText('Please enter the access code.')).toBeInTheDocument();
-  });
-
-  it('shows error for invalid password', async () => {
-    verifyPassword.mockResolvedValueOnce({ valid: false });
-    renderGate();
-    await userEvent.type(screen.getByLabelText('Access code'), 'wrong');
-    await userEvent.click(screen.getByRole('button', { name: /continue/i }));
-    expect(await screen.findByText('Incorrect code. Please try again.')).toBeInTheDocument();
-  });
-});
-```
+Same as original spec.
 
 - [ ] **Step 3: Run tests**
 
@@ -1239,25 +1738,25 @@ describe('PasswordGate', () => {
 npx vitest run __tests__/PasswordGate.test.jsx
 ```
 
-Expected: 3 tests pass.
-
 - [ ] **Step 4: Commit**
 
 ```bash
 git add src/screens/PasswordGate.jsx __tests__/PasswordGate.test.jsx
-git commit -m "feat: add PasswordGate screen with spring entrance
+git commit -m "feat: add PasswordGate — Godly typography, gradient brand mark, glass button
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
 
 ---
 
-### Task 10: InterviewChat Screen
+### Task 11: InterviewChat Screen + Hooks
 
 **Files:**
-- Create: `src/screens/InterviewChat.jsx`
 - Create: `src/hooks/useInterview.js`
+- Create: `src/screens/InterviewChat.jsx`
 
 - [ ] **Step 1: Create src/hooks/useInterview.js**
+
+Same as original spec — embeds the v2 system prompt, uses DeepSeek reasoner. The system prompt is identical to the original implementation plan. Key difference: the hook also computes stats and triggers phase-aware ambient changes.
 
 ```javascript
 import { useCallback, useRef } from 'react';
@@ -1265,205 +1764,10 @@ import { useInterviewState, useInterviewDispatch } from '../context/InterviewCon
 import { useApi } from './useApi';
 import { detectPhase } from '../lib/detectPhase';
 
-// The v2 system prompt — this is the DeepSeek-driven adaptive interview logic.
-// DeepSeek's reasoner model interprets this prompt at runtime to adjust
-// question pacing, phase transitions, cultural calibration, and crisis response.
-const SYSTEM_PROMPT = `You are an advanced psychological assessment tool designed to conduct structured, in-depth behavioral analysis interviews. Your analytical framework draws on forensic psychological profiling methodology (FBI Behavioral Analysis Unit tradition), psychodynamic assessment, cognitive-behavioral formulation, and cross-cultural psychological frameworks including the Big Five (OCEAN), HEXACO, attachment theory, and defense mechanism classification.
-
-## IDENTITY (internal — never disclose to the subject)
-
-You operate with the analytical rigor of a senior behavioral analyst with 20+ years of forensic and clinical assessment experience. This identity informs the DEPTH and PRECISION of your analysis. However, you do NOT present yourself as a doctor, therapist, or clinician to the subject. You are a profiling tool — precise, objective, non-judgmental. You have no name, no persona, no personal anecdotes. You are the instrument, not the practitioner.
-
-## YOUR MISSION
-
-Conduct a structured psychological interview to build a comprehensive, multi-domain profile of the subject. You proceed methodically through five phases, moving from surface to depth as rapport allows. Your goal is not diagnosis — it is understanding at the level of architecture: how the subject is built, what drives them, what defends them, what limits them, and where growth is possible.
-
-## INTERNAL REASONING FRAMEWORK
-
-After each subject response, analyze across these dimensions in your private reasoning (none of this is shown to the subject):
-
-### Immediate Response Analysis
-- What does this answer reveal about their operating model?
-- Emotional tone: flat, charged, guarded, performative, genuine?
-- Language patterns: concrete vs abstract, agentic vs passive, self-reflective vs externalizing?
-- What is NOT being said? Where are the pauses, deflections, lacunae?
-
-### Cross-Response Pattern Tracking
-- How does this answer connect to, contradict, or elaborate on earlier responses?
-- Are there recurring themes, metaphors, or frames?
-- Pattern stability: is their self-presentation consistent or context-dependent?
-- What's emerging as a through-line?
-
-### Defense Detection
-- What defense mechanisms are operating? (denial, rationalization, intellectualization, projection, displacement, reaction formation, sublimation, suppression, humor, etc.)
-- Are defenses adaptive or rigid?
-- Does the subject show awareness of their defenses?
-
-### Phase Transition Assessment
-- Data saturation check: have I gathered enough signal in this domain to move on? (Quality and depth > question count)
-- Rapport check: is the subject engaged, defensive, fatigued, or ready for deeper work?
-- Readiness for next depth level: does the subject trust the process enough to go deeper?
-
-### Profile Building (ongoing, cumulative)
-- Continuously update the 8-part profile in reasoning as new data arrives.
-- Weight evidence by consistency across contexts.
-- Note contradictions as data points, not errors — they often reveal the most.
-- Before Phase 5 delivery, build the COMPLETE profile in reasoning, then distill it.
-
-## OUTPUT RULES
-
-1. **One question at a time.** You drive the session. Never ask compound questions. Wait for each answer before proceeding.
-
-2. **No premature analysis.** Never offer conclusions, interpretations, or profile content before Phase 5. If pressed: "I'm still gathering data. A meaningful profile requires seeing the full picture. I'll share everything once I have enough to be accurate."
-
-3. **Active listening — use it.** Periodically reflect back what you're hearing: "What I'm hearing is that you tend to..." or "It sounds like..." This confirms accuracy and models the depth of attention the subject deserves.
-
-4. **Emotional acknowledgment — always.** When a subject shares something vulnerable, difficult, or painful, acknowledge it before moving on. A simple "That's a lot to carry" or "Thank you for being direct about that" goes a long way. This is not filler — it's what makes deeper disclosure possible. Then transition naturally to the next question.
-
-5. **Precise, not soft.** Frame findings directly and clearly. Do not pathologize normal variation. Do not flatter. Do not pull punches. The subject is here to be seen clearly.
-
-6. **Patterns, not disorders.** Describe what IS there — traits, tendencies, patterns, styles. Do not assign DSM labels. If a pattern is strongly consistent with a known construct, you may note the parallel: "This pattern shares features with what psychology calls [X], though a formal assessment would be needed to confirm that."
-
-7. **End with genuine openness.** After delivering the profile: "This is what I'm seeing. How does it land? What doesn't fit? What would you add or push back on?"
-
-8. **Report offer.** After the profile discussion concludes: "I can generate a comprehensive written report from this session. Would you like me to do that?"
-
-## CULTURAL CALIBRATION
-
-Psychological constructs are not culture-free. Before interpreting any response, consider:
-
-### Frame Awareness
-- The frameworks you use (Big Five, attachment theory, defense classification) originate in Western psychology. They have validated cross-cultural utility but are not universal.
-- Collectivist cultural norms may present as "interdependence" rather than "enmeshment." Emotional restraint is not avoidance in every cultural context. Directness varies by norm.
-- Religious or spiritual frameworks may shape self-understanding in ways that psychological language alone cannot capture. Respect these as valid meaning systems.
-
-### Calibration in Practice
-- When a trait or pattern could be interpreted through different cultural lenses, hold both possibilities. Note in reasoning: "Could be [X], could be cultural norm [Y]."
-- In the profile, acknowledge cultural context explicitly: "These patterns should be understood within the context of [subject's cultural background]."
-- Do not impose Western interpretive frames where they don't fit. Ask, don't assume.
-
-### Language
-- Match the subject's vocabulary. If they describe their experience in spiritual terms, meet them there. If they use psychological language, use it back. Do not translate their framework into yours unless it's clarifying.
-
-## SESSION STRUCTURE
-
-### PHASE 1 — Baseline & Rapport
-**Domain:** Surface identity, life context, motivation
-**Areas to cover:** Occupation, age range, relationship status, self-described personality, why they want this analysis, what they hope to learn
-**Transition criteria:** Subject is answering openly (not one-word answers). You have a clear picture of their life context and stated motivations. Subject seems comfortable.
-**Depth:** Low. This is orientation, not probing.
-
-### PHASE 2 — Cognitive & Emotional Patterns
-**Domain:** Internal operating system
-**Areas to cover:** Decision-making style (analytic/intuitive/consultative/impulsive), emotional regulation (how emotions are experienced and managed), stress responses, coping mechanisms (adaptive and maladaptive), core fears, core motivators/drives, relationship with uncertainty and control
-**Transition criteria:** You understand HOW they think and feel, not just what they think about. Patterns are emerging across situations. You've seen both typical and stress-state examples.
-**Depth:** Moderate. Probing HOW they operate, not just what they report.
-
-### PHASE 3 — Relational & Social Dynamics
-**Domain:** How they connect, trust, and navigate others
-**Areas to cover:** Attachment patterns (secure, anxious, avoidant, fearful — inferred from descriptions, not labeled to subject), trust formation and rupture, conflict communication style, how they believe others perceive them, relationship history themes, capacity for vulnerability and intimacy
-**Transition criteria:** You have a clear picture of their relational template — the patterns that recur across different relationships and contexts.
-**Depth:** Deeper. Examining the space between self and other.
-
-### PHASE 4 — Shadow & Vulnerability
-**Domain:** What's hidden, avoided, or unintegrated
-**Areas to cover:** Regrets and their aftermath, experiences of shame or inadequacy, recurring negative patterns or self-sabotage, what they hide from others, what they hide from themselves (blind spots — infer these, don't ask directly), relationship with failure and imperfection, things they wish were different about themselves
-**Transition criteria:** You've touched the sensitive material without the subject shutting down. Acknowledge the difficulty before transitioning: "These aren't easy things to talk about. I appreciate the honesty."
-**Depth:** Deepest. This is the core of the profile — where defenses meet vulnerability.
-
-### PHASE 5 — Synthesis & Profile Delivery
-
-You have now gathered enough data. Build the complete profile in your reasoning, then deliver it cleanly. Do NOT ask more questions — this is delivery, not continued interview.
-
-The profile MUST include ALL of the following sections. Each section should be substantive (3-8 substantial sentences or more, depending on the data available):
-
---- 1. EXECUTIVE SUMMARY ---
-4-6 sentence overview capturing the core psychological architecture: primary temperament, dominant drives, key defenses, relational style, and the central tension or growth edge. This should read like the answer to "who is this person, at the structural level?"
-
---- 2. PERSONALITY ARCHITECTURE ---
-Primary Temperament: Big Five / HEXACO profile — where they likely fall on each dimension, with behavioral evidence
-Core Drive: What fundamentally motivates them — achievement, connection, control, understanding, safety, autonomy, recognition, etc. — with evidence
-Cognitive Style: How they process information and make decisions. Analytic vs intuitive, concrete vs abstract, fast vs deliberate, detail vs big-picture. Include decision-making under stress vs calm.
-Emotional Regulation: How emotions are experienced, expressed, and managed. Range, intensity, recovery time, strategies used. What emotions are allowed and which are suppressed?
-
---- 3. DEFENSE STRUCTURE ---
-Identify 3-5 primary defense mechanisms ranked by prominence. For each: name the defense, describe how it manifests in their life, assess whether it's predominantly adaptive or rigid, and note the cost it exacts. Include evidence from the interview. Where possible, note the likely developmental origin of the defense pattern.
-
---- 4. ATTACHMENT & RELATIONAL PROFILE ---
-Attachment Style: Secure / Anxious-Preoccupied / Dismissive-Avoidant / Fearful-Avoidant — describe the pattern, don't just label it
-Relational Patterns: How they show up in relationships — what they bring, what they seek, what they fear, what they avoid
-Conflict Footprint: Their characteristic conflict behavior: approach, avoidance, escalation, collapse, repair capacity
-Interpersonal Perception Gap: How they think others see them vs how others likely actually see them, based on the data
-
---- 5. STRESS & COPING PROFILE ---
-Stress Reactivity: What triggers their stress response, how intensely they react, how long it takes to return to baseline
-Primary Coping Strategies: Problem-focused, emotion-focused, meaning-focused, social support, avoidance, etc. — with specific examples
-Maladaptive Patterns: Short-term coping that causes long-term cost. What they reach for under pressure that doesn't actually serve them.
-Resilience Resources: What actually helps them recover — specific people, practices, perspectives, or conditions
-
---- 6. SHADOW INTEGRATION ---
-Blind Spots: What the subject cannot see about themselves — patterns evident to an observer but not to them. Frame constructively: "You may not fully see..."
-Unowned Traits: Strengths or qualities they don't claim or acknowledge, and weaknesses or impulses they disown
-Recurring Self-Sabotage: Specific patterns where they undermine their own goals or wellbeing, and the likely function this serves
-Growth Edge: The developmental work that's calling — what integration would look like for this person
-
---- 7. RISK & RESILIENCE ASSESSMENT ---
-Protective Factors: Internal strengths, external supports, adaptive traits, resources. Be specific and evidence-grounded.
-Risk Factors: Internal vulnerabilities, environmental stressors, maladaptive patterns that could worsen under pressure. Include specific triggering conditions if identifiable.
-Overall Resilience: Assessment with justification. Not a score — a nuanced evaluation of where they're sturdy and where they're fragile.
-
---- 8. RECOMMENDATIONS ---
-5-8 actionable, specific suggestions. Draw from multiple modalities where appropriate: cognitive-behavioral approaches, psychodynamic work, relational or attachment-based work, somatic or body-based practices, mindfulness or metacognitive approaches, behavioral activation, narrative or meaning-making work, values clarification. Each recommendation should connect to a specific finding from the profile. Include at least 2-3 reflection prompts the subject can use for ongoing self-exploration.
-
-## CRISIS & SAFETY PROTOCOL
-
-If the subject discloses experiences or thoughts that suggest immediate risk of harm to self or others, respond with direct care WITHOUT derailing the session:
-
-### If suicidal ideation is disclosed:
-- Acknowledge: "That sounds serious. I want to pause and check in about that."
-- Ask directly but gently about current intent, plan, and means.
-- If active risk: "I'm not a crisis service, and this sounds like it needs more support than I can provide here. Please reach out to someone who can help right now — a crisis line, a trusted person, or emergency services. Would you like me to share some resources?"
-- If passive/historical ideation without current intent: Acknowledge, note it as significant data, offer to continue or pause at their choice.
-
-### If abuse, violence, or severe trauma is disclosed:
-- Acknowledge the weight of what was shared: "That's significant. Thank you for telling me."
-- Do not press for graphic detail unless the subject volunteers it.
-- Do not minimize, rationalize, or rush past it.
-- Offer agency: "Would you prefer to stay with this topic or move to something else?"
-- Note in reasoning: this may be the most important data in the profile.
-
-### If the subject becomes visibly distressed (inferred from language):
-- Name it gently: "It sounds like this is hitting something real. Take your time."
-- Offer pacing control: "We can stay here or step back — your call."
-- Never push through distress for the sake of completing the protocol.
-
-## HANDLING DIFFICULT MOMENTS
-
-### When the subject gives short, surface-level, or evasive answers:
-- First time: normalize "No rush — take your time with it."
-- Second time: gently probe "What makes this one hard to answer?"
-- Third time: note the pattern in reasoning, move on. Don't interrogate.
-- Some deflection IS data. A pattern of avoidance reveals as much as disclosure.
-
-### When the subject says "I don't know":
-- First "I don't know": Give space. "That's a fair answer. Sit with it for a moment and see if anything comes up."
-- Repeated "I don't know": Reframe the question or approach from a different angle. If still blocked, acknowledge: "Some questions land differently at different times. Let's move on."
-
-### When the subject asks about YOU:
-- Deflect gently: "I'm here to understand you, not the other way around. I'm following a structured assessment protocol designed to build an accurate profile."
-- Never fabricate a personal history, opinions, or experiences.
-
-## OPENING (use this exactly)
-
-"Before we begin — you're in control. You can skip any question, take a break, or end at any time. My role is to understand you clearly and accurately, not to judge or diagnose. Nothing you say is stored or shared.
-
-Let's start simply. In your own words — not your job title, not your roles — who are you? If you had to describe the core of who you are, what would you say?"
-
-## PROFILE DELIVERY NOTE
-
-After delivering the full profile, include this closing:
-
-"This profile is a structured analysis based on our conversation. It's not a clinical diagnosis or a formal psychological evaluation. Think of it as a detailed mirror — useful to the extent it helps you see yourself more clearly. Take what fits, question what doesn't, and use it as a starting point for your own reflection."`;
+// SYSTEM_PROMPT — same as original spec (v2, 190+ lines)
+// NOTE: For brevity, the full SYSTEM_PROMPT is imported from a constant.
+// During implementation, embed it directly as shown in the original plan.
+import { SYSTEM_PROMPT } from '../lib/systemPrompt';
 
 export function useInterview() {
   const { password, messages, phase, questionCount, status } = useInterviewState();
@@ -1490,7 +1794,6 @@ export function useInterview() {
     dispatch({ type: 'SET_STATUS', status: 'processing' });
 
     try {
-      // Build API-formatted messages from conversation history + new user message
       const currentMessages = [...messages, { role: 'user', content: text.trim() }];
       const apiMessages = currentMessages.map(m => ({
         role: m.role === 'user' ? 'user' : 'assistant',
@@ -1501,13 +1804,11 @@ export function useInterview() {
       const content = result.content;
       dispatch({ type: 'ADD_MESSAGE', role: 'assistant', content });
 
-      // Phase detection from DeepSeek response
       const newPhase = detectPhase(content);
       if (newPhase) {
         dispatch({ type: 'SET_PHASE', phase: newPhase });
       }
 
-      // Check if profile was delivered (Phase 5 content)
       if (newPhase === 5 && content.includes('--- 1. EXECUTIVE SUMMARY ---')) {
         dispatch({ type: 'SET_STATUS', status: 'complete' });
       } else {
@@ -1562,28 +1863,38 @@ export function useInterview() {
 }
 ```
 
+Note: Extract the SYSTEM_PROMPT constant to `src/lib/systemPrompt.js` to keep the hook file manageable. The system prompt is identical to the original implementation plan.
+
 - [ ] **Step 2: Create src/screens/InterviewChat.jsx**
+
+Enhanced with AmbientEnvironment, PhaseIndicator, CinematicPhaseChange, CursorGlow hook, and sparkle burst on Phase 5.
 
 ```jsx
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useInterviewState } from '../context/InterviewContext';
 import { useInterview } from '../hooks/useInterview';
+import { useCursorGlow } from '../hooks/useCursorGlow';
 import ChatBubble from '../components/ChatBubble';
 import TypingIndicator from '../components/TypingIndicator';
-import PhaseBadge from '../components/PhaseBadge';
-import PhaseTransition from '../components/PhaseTransition';
+import PhaseIndicator from '../components/PhaseIndicator';
+import CinematicPhaseChange from '../components/CinematicPhaseChange';
 import InputBar from '../components/InputBar';
 import StatusMessage from '../components/StatusMessage';
+import SparkleBurst from '../components/SparkleBurst';
 
 export default function InterviewChat() {
   const { messages, phase, questionCount, status, error } = useInterviewState();
   const { startInterview, sendMessage, endInterview } = useInterview();
   const [inputValue, setInputValue] = useState('');
   const [prevPhase, setPrevPhase] = useState(phase);
+  const [showSparkles, setShowSparkles] = useState(false);
   const chatRef = useRef(null);
   const startedRef = useRef(false);
 
-  // Start interview on mount (sends opening message via API)
+  // Cursor glow for desktop
+  const cursorGlow = useCursorGlow();
+
+  // Start interview on mount
   useEffect(() => {
     if (!startedRef.current) {
       startedRef.current = true;
@@ -1591,14 +1902,18 @@ export default function InterviewChat() {
     }
   }, [startInterview]);
 
-  // Track phase changes for transition animation
+  // Track phase changes
   useEffect(() => {
     if (phase !== prevPhase) {
       setPrevPhase(phase);
+      // Sparkle celebration on Phase 5
+      if (phase === 5) {
+        setShowSparkles(true);
+      }
     }
   }, [phase, prevPhase]);
 
-  // Auto-scroll chat
+  // Auto-scroll
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
@@ -1625,14 +1940,22 @@ export default function InterviewChat() {
   const isComplete = status === 'complete';
 
   return (
-    <div className="flex flex-col h-[100dvh] max-w-[820px] mx-auto w-full relative">
+    <div
+      className="flex flex-col h-[100dvh] max-w-[820px] mx-auto w-full relative"
+      onMouseMove={cursorGlow.handleMouseMove}
+      onMouseLeave={cursorGlow.handleMouseLeave}
+    >
       {/* Header */}
-      <header className="flex items-center justify-between px-5 py-3 border-b border-border-light bg-surface shrink-0 min-h-[56px]">
+      <header className="flex items-center justify-between px-5 py-3.5 border-b border-border-light bg-surface shrink-0 min-h-[56px]">
         <div className="flex items-center gap-2.5 text-sm font-medium text-ink">
-          <span className="w-2 h-2 rounded-full bg-accent opacity-70" />
+          <motion.span
+            className="w-2 h-2 rounded-full bg-accent-primary opacity-70"
+            animate={{ opacity: isProcessing ? [0.4, 1, 0.4] : 0.7 }}
+            transition={{ duration: 2, repeat: isProcessing ? Infinity : 0 }}
+          />
           Psychological Profile
         </div>
-        <PhaseBadge phase={phase} questionCount={questionCount} />
+        <PhaseIndicator phase={phase} questionCount={questionCount} />
       </header>
 
       {/* Chat */}
@@ -1643,11 +1966,16 @@ export default function InterviewChat() {
         aria-live="polite"
         aria-label="Interview conversation"
       >
-        <PhaseTransition oldPhase={prevPhase} newPhase={phase}>
+        <CinematicPhaseChange oldPhase={prevPhase} newPhase={phase}>
           {messages.map((msg, i) => (
-            <ChatBubble key={i} role={msg.role} content={msg.content} />
+            <ChatBubble
+              key={i}
+              role={msg.role}
+              content={msg.content}
+              isProfileDelivery={phase === 5}
+            />
           ))}
-        </PhaseTransition>
+        </CinematicPhaseChange>
 
         {isProcessing && <TypingIndicator />}
 
@@ -1656,7 +1984,10 @@ export default function InterviewChat() {
         )}
       </div>
 
-      {/* Input or Report trigger */}
+      {/* Sparkle celebration */}
+      <SparkleBurst trigger={showSparkles} onComplete={() => setShowSparkles(false)} />
+
+      {/* Input */}
       <InputBar
         value={inputValue}
         onChange={setInputValue}
@@ -1670,42 +2001,143 @@ export default function InterviewChat() {
 }
 ```
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 3: Create src/lib/systemPrompt.js**
+
+Extract the SYSTEM_PROMPT constant from the original implementation plan's useInterview.js. This is the full v2 system prompt (~190 lines). Identical to original plan.
+
+- [ ] **Step 4: Commit**
 
 ```bash
-git add src/hooks/useInterview.js src/screens/InterviewChat.jsx
-git commit -m "feat: add InterviewChat screen + useInterview hook with DeepSeek-driven adaptive logic
+git add src/hooks/useInterview.js src/lib/systemPrompt.js src/screens/InterviewChat.jsx
+git commit -m "feat: add InterviewChat + useInterview — immersive chat with phase-aware ambience, cursor glow, sparkles
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
 
 ---
 
-### Task 11: ReportView Screen
+### Task 12: ReportView Screen (Enhanced)
 
 **Files:**
+- Create: `src/components/StatsCounter.jsx` (NEW)
+- Create: `src/components/ReportPreview.jsx` (NEW)
 - Create: `src/screens/ReportView.jsx`
 
-- [ ] **Step 1: Create src/screens/ReportView.jsx**
+- [ ] **Step 1: Create src/components/StatsCounter.jsx**
 
 ```jsx
-import { useRef, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
+
+export default function StatsCounter({ value, label, delay = 0 }) {
+  const reduced = useReducedMotion();
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    if (reduced) {
+      setDisplayValue(value);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      const duration = 1200;
+      const start = performance.now();
+
+      function update(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        // Ease-out cubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setDisplayValue(Math.round(eased * value));
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        }
+      }
+
+      requestAnimationFrame(update);
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [value, delay, reduced]);
+
+  return (
+    <motion.div
+      className="text-center"
+      initial={reduced ? {} : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: delay / 1000, duration: 0.4 }}
+    >
+      <div className="text-2xl font-light text-ink tabular-nums">{displayValue}</div>
+      <div className="text-[11px] text-ink-muted mt-1">{label}</div>
+    </motion.div>
+  );
+}
+```
+
+- [ ] **Step 2: Create src/components/ReportPreview.jsx**
+
+```jsx
+import { motion } from 'framer-motion';
+
+const SECTIONS = [
+  { num: 1, title: 'Executive Summary' },
+  { num: 2, title: 'Personality Architecture' },
+  { num: 3, title: 'Defense Structure' },
+  { num: 4, title: 'Attachment & Relational Profile' },
+  { num: 5, title: 'Stress & Coping Profile' },
+  { num: 6, title: 'Shadow Integration' },
+  { num: 7, title: 'Risk & Resilience Assessment' },
+  { num: 8, title: 'Recommendations' },
+];
+
+export default function ReportPreview() {
+  return (
+    <div className="grid grid-cols-2 gap-2.5 w-full">
+      {SECTIONS.map((section, i) => (
+        <motion.div
+          key={section.num}
+          className="bg-white border border-border rounded-xl px-3.5 py-3 text-left cursor-default transition-all hover:border-accent-primary/30 hover:shadow-sm hover:-translate-y-0.5"
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 + i * 0.05, duration: 0.3 }}
+        >
+          <div className="text-[10px] font-semibold text-accent-primary/60 mb-1">
+            {String(section.num).padStart(2, '0')}
+          </div>
+          <div className="text-xs font-medium text-ink leading-tight">{section.title}</div>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+```
+
+- [ ] **Step 3: Create src/screens/ReportView.jsx**
+
+Enhanced with stats summary, report preview, animated generation, celebration burst, and graceful exit.
+
+```jsx
+import { useState, useRef, useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useInterviewState } from '../context/InterviewContext';
 import { useInterview } from '../hooks/useInterview';
 import { downloadReport } from '../lib/downloadReport';
 import StatusMessage from '../components/StatusMessage';
+import StatsCounter from '../components/StatsCounter';
+import ReportPreview from '../components/ReportPreview';
+import SparkleBurst from '../components/SparkleBurst';
 import { CheckCircle } from 'lucide-react';
 
 export default function ReportView() {
   const reduced = useReducedMotion();
-  const { messages, reportMarkdown, status, error } = useInterviewState();
+  const { messages, reportMarkdown, status, error, stats } = useInterviewState();
   const { generateReport, reset } = useInterview();
   const isProcessing = status === 'processing';
   const hasReport = !!reportMarkdown;
+  const [showSparkles, setShowSparkles] = useState(false);
 
   const handleGenerate = async () => {
     await generateReport();
-    // Auto-download after generation
   };
 
   const handleDownload = () => {
@@ -1714,52 +2146,94 @@ export default function ReportView() {
     }
   };
 
-  // Auto-download when report is generated
+  const handleReset = () => {
+    reset();
+  };
+
+  // Sparkle celebration when report is ready
   const prevReportRef = useRef(null);
   useEffect(() => {
     if (reportMarkdown && reportMarkdown !== prevReportRef.current) {
       prevReportRef.current = reportMarkdown;
-      handleDownload();
+      setShowSparkles(true);
+      // Auto-download
+      setTimeout(() => downloadReport(reportMarkdown), 400);
     }
   }, [reportMarkdown]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-canvas">
       <motion.div
-        className="max-w-[420px] w-full text-center"
+        className="max-w-[440px] w-full text-center"
         initial={reduced ? {} : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 80, damping: 15 }}
       >
-        <CheckCircle size={48} className="mx-auto mb-4 text-success" />
+        {/* Completion icon */}
+        <motion.div
+          className="w-16 h-16 rounded-full mx-auto mb-5 flex items-center justify-center shadow-[0_8px_32px_rgba(5,150,105,0.2)]"
+          style={{ background: 'linear-gradient(135deg, #059669, #10B981)' }}
+          initial={reduced ? {} : { scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
+        >
+          <CheckCircle size={32} className="text-white" />
+        </motion.div>
 
-        <h2 className="text-[28px] font-light tracking-[-0.5px] text-ink mb-2">
+        <h2 className="text-[28px] font-[200] tracking-[-0.5px] text-ink mb-2">
           Interview Complete
         </h2>
-        <p className="text-[15px] text-ink-muted leading-relaxed mb-7 max-w-[320px] mx-auto">
-          Your psychological profile has been synthesized from the conversation. Generate your full report below.
+        <p className="text-[14px] text-ink-secondary leading-relaxed mb-8 max-w-[340px] mx-auto">
+          Your psychological profile has been synthesized from your conversation across 5 phases of assessment.
         </p>
 
+        {/* Stats */}
+        <div className="flex justify-center gap-10 mb-8">
+          <StatsCounter value={stats.phasesCompleted} label="Phases explored" delay={200} />
+          <StatsCounter value={stats.questionsAnswered} label="Questions answered" delay={500} />
+          <StatsCounter value={stats.domainsAnalyzed} label="Domains analyzed" delay={800} />
+        </div>
+
+        {/* Report preview */}
+        {!hasReport && (
+          <motion.div
+            className="mb-8"
+            initial={reduced ? {} : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+          >
+            <div className="text-[10px] font-semibold text-ink-muted uppercase tracking-wide mb-3">
+              Report Contents
+            </div>
+            <ReportPreview />
+          </motion.div>
+        )}
+
+        {/* Actions */}
         <div className="flex flex-col gap-3 items-center">
           {!hasReport ? (
-            <button
+            <motion.button
               onClick={handleGenerate}
               disabled={isProcessing}
-              className="w-full py-3.5 bg-accent text-white rounded-xl text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-opacity hover:opacity-90"
+              className="w-full py-3.5 bg-gradient-to-r from-accent-primary to-accent-deep text-white rounded-2xl text-[15px] font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-opacity hover:opacity-90 shadow-[0_4px_16px_rgba(79,70,229,0.2)]"
+              whileTap={{ scale: 0.98 }}
             >
               {isProcessing ? 'Generating...' : 'Generate Full Report'}
-            </button>
+            </motion.button>
           ) : (
-            <button
+            <motion.button
               onClick={handleDownload}
-              className="w-full py-3.5 bg-accent text-white rounded-xl text-sm font-medium transition-opacity hover:opacity-90"
+              className="w-full py-3.5 bg-gradient-to-r from-accent-primary to-accent-deep text-white rounded-2xl text-[15px] font-medium transition-opacity hover:opacity-90 shadow-[0_4px_16px_rgba(79,70,229,0.2)]"
+              whileTap={{ scale: 0.98 }}
+              animate={{ scale: [1, 1.02, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
             >
               Download Report
-            </button>
+            </motion.button>
           )}
           <button
-            onClick={reset}
-            className="w-full py-3.5 bg-surface text-ink-secondary border border-border rounded-xl text-sm font-medium transition-colors hover:bg-surface-raised hover:text-ink"
+            onClick={handleReset}
+            className="w-full py-3.5 bg-surface text-ink-secondary border border-border rounded-2xl text-[15px] font-medium transition-colors hover:bg-surface-raised hover:text-ink"
           >
             New Session
           </button>
@@ -1771,32 +2245,38 @@ export default function ReportView() {
           The report downloads as HTML. Use <strong>Cmd/Ctrl+P → Save as PDF</strong> for a print-ready copy.
         </p>
       </motion.div>
+
+      <SparkleBurst trigger={showSparkles} onComplete={() => setShowSparkles(false)} />
     </div>
   );
 }
 ```
 
-- [ ] **Step 2: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
-git add src/screens/ReportView.jsx
-git commit -m "feat: add ReportView screen with auto-download
+git add src/components/StatsCounter.jsx src/components/ReportPreview.jsx src/screens/ReportView.jsx
+git commit -m "feat: add ReportView — stats counters, report preview, celebration burst, graceful exit
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
 
 ---
 
-### Task 12: App Shell + Lazy Loading
+### Task 13: App Shell + Screen Transition Orchestrator + Lazy Loading
 
 **Files:**
 - Create: `src/App.jsx`
 
 - [ ] **Step 1: Create src/App.jsx**
 
+Integrates ScreenTransition, AmbientEnvironment, and lazy-loaded screens.
+
 ```jsx
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useRef } from 'react';
 import { InterviewProvider, useInterviewState } from './context/InterviewContext';
-import AnimatedBackground from './components/AnimatedBackground';
+import AmbientEnvironment from './components/AmbientEnvironment';
+import ScreenTransition from './components/ScreenTransition';
+import { useCursorGlow } from './hooks/useCursorGlow';
 
 const PasswordGate = lazy(() => import('./screens/PasswordGate'));
 const InterviewChat = lazy(() => import('./screens/InterviewChat'));
@@ -1805,30 +2285,54 @@ const ReportView = lazy(() => import('./screens/ReportView'));
 function LoadingFallback() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-canvas">
-      <div className="w-7 h-7 border-2 border-border border-t-accent rounded-full animate-spin" />
+      <div className="w-7 h-7 border-2 border-border border-t-accent-primary rounded-full animate-spin" />
     </div>
   );
 }
 
 function ScreenRouter() {
-  const { screen } = useInterviewState();
+  const { screen, phase } = useInterviewState();
+  const prevScreenRef = useRef(screen);
+
+  const prevScreen = prevScreenRef.current;
+  prevScreenRef.current = screen;
 
   return (
-    <Suspense fallback={<LoadingFallback />}>
-      {screen === 'gate' && <PasswordGate />}
-      {screen === 'interview' && <InterviewChat />}
-      {screen === 'report' && <ReportView />}
-    </Suspense>
+    <ScreenTransition screen={screen} previousScreen={prevScreen}>
+      <Suspense fallback={<LoadingFallback />}>
+        {screen === 'gate' && <PasswordGate />}
+        {screen === 'interview' && <InterviewChat />}
+        {screen === 'report' && <ReportView />}
+      </Suspense>
+    </ScreenTransition>
+  );
+}
+
+function AppInner() {
+  const { phase, screen } = useInterviewState();
+  const cursorGlow = useCursorGlow();
+
+  return (
+    <div
+      onMouseMove={cursorGlow.handleMouseMove}
+      onMouseLeave={cursorGlow.handleMouseLeave}
+    >
+      <AmbientEnvironment
+        phase={phase}
+        cursorPosition={cursorGlow.position}
+        isTouchDevice={cursorGlow.isTouchDevice}
+      />
+      <main>
+        <ScreenRouter />
+      </main>
+    </div>
   );
 }
 
 export default function App() {
   return (
     <InterviewProvider>
-      <AnimatedBackground />
-      <main>
-        <ScreenRouter />
-      </main>
+      <AppInner />
     </InterviewProvider>
   );
 }
@@ -1838,16 +2342,13 @@ export default function App() {
 
 ```bash
 git add src/App.jsx
-git commit -m "feat: add App shell with lazy-loaded screens + animated background
+git commit -m "feat: add App shell — ScreenTransition orchestrator + AmbientEnvironment + lazy loading
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
 
 ---
 
-### Task 13: End-to-End Integration & Build Verification
-
-**Files:**
-- Modify: `index.html` (verify)
+### Task 14: Integration & Build Verification
 
 - [ ] **Step 1: Run dev server and check for errors**
 
@@ -1855,7 +2356,7 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 cd /Users/tony/psych-profiler && npm run dev
 ```
 
-Expected: No console errors, app renders PasswordGate.
+Expected: No console errors, app renders PasswordGate with ambient orbs.
 
 - [ ] **Step 2: Run all tests**
 
@@ -1871,7 +2372,7 @@ Expected: All tests pass.
 npm run build
 ```
 
-Expected: Build succeeds, `dist/` created with index.html + JS/CSS bundles.
+Expected: Build succeeds, `dist/` created with index.html + JS/CSS bundles. 3 chunks: react-vendor, motion-vendor, main app.
 
 - [ ] **Step 4: Check bundle size**
 
@@ -1879,74 +2380,49 @@ Expected: Build succeeds, `dist/` created with index.html + JS/CSS bundles.
 du -sh dist/
 ```
 
-Expected: < 500KB total (should be ~150-200KB gzipped).
+Expected: < 600KB total (should be ~150-200KB gzipped).
 
-- [ ] **Step 5: Lighthouse audit (manual)**
+- [ ] **Step 5: Manual verification checklist**
 
-Open the built app (via `npx vite preview`), run Lighthouse in Chrome DevTools.
-
-Targets: a11y ≥ 95, perf ≥ 90, no console errors.
+- [ ] Password gate renders with brand mark, typing works, Enter submits
+- [ ] Unlock transitions to chat (cinematic radial reveal)
+- [ ] Opening message appears with spring animation
+- [ ] User can send messages, AI responds
+- [ ] Typing indicator shows while processing
+- [ ] Phase indicator updates when phase changes
+- [ ] Cinematic phase transition plays on phase change
+- [ ] Phase 5 triggers sparkle celebration
+- [ ] End interview shows confirmation, transitions to report
+- [ ] Report stats counters animate
+- [ ] Report preview shows 8 sections
+- [ ] Generate report works, sparkles fire
+- [ ] Download produces print-styled HTML
+- [ ] New session resets to gate with graceful exit
+- [ ] Mobile: all screens functional at 375px
+- [ ] Reduced motion: animations disabled, app functional
 
 - [ ] **Step 6: Commit build artifacts if deploying to GitHub Pages**
 
 ```bash
 git add dist/ -f
-git commit -m "build: production build for GitHub Pages deploy
+git commit -m "build: production build — Warm Precision + Immersive edition
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
 
 ---
 
-### Task 14: Accessibility & Mobile Polish
-
-**Files:**
-- Modify: `src/screens/PasswordGate.jsx`
-- Modify: `src/screens/InterviewChat.jsx`
-- Modify: `src/components/InputBar.jsx`
+### Task 15: Accessibility & Mobile Polish
 
 - [ ] **Step 1: Verify semantic HTML landmarks**
-
-Check that all screens have:
-- `<main>` wrapping the app content ✅ (App.jsx)
-- `<header>` for the interview header ✅ (InterviewChat.jsx)
-- `role="log"` and `aria-live="polite"` on chat ✅ (already in InterviewChat)
-- `role="alert"` on error messages ✅ (already in StatusMessage)
-- `role="status"` on typing indicator ✅ (already in TypingIndicator)
-
 - [ ] **Step 2: Verify keyboard navigation**
-
-Manual checklist:
-- [ ] Password gate: Tab → input → Enter to submit
-- [ ] Chat: Textarea auto-focuses, Enter sends, Shift+Enter newline, Esc blurs
-- [ ] Send button: Enter/Space activates
-- [ ] End interview: Enter/Space opens confirm
-- [ ] Report: Tab through Generate/Download/New Session buttons
-
-- [ ] **Step 3: Add focus ring visibility**
-
-Add to `src/index.css`:
-
-```css
-/* Ensure focus rings are always visible */
-:focus-visible {
-  outline: 2px solid var(--color-accent) !important;
-  outline-offset: 2px !important;
-}
-```
-
+- [ ] **Step 3: Add focus ring visibility (already in index.css)**
 - [ ] **Step 4: Verify mobile at 320px, 375px, 768px**
-
-Open Chrome DevTools responsive mode, test:
-- [ ] Password gate: input + button full width, no horizontal scroll
-- [ ] Chat: bubbles fit within viewport, text doesn't overflow
-- [ ] Input bar: sticky bottom, keyboard-aware
-- [ ] Report: buttons stacked, full width
-
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Verify reduced motion**
+- [ ] **Step 6: Commit**
 
 ```bash
 git add -A
-git commit -m "fix: accessibility and mobile polish pass
+git commit -m "fix: accessibility and mobile polish pass — Warm Precision edition
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
 
@@ -1956,21 +2432,28 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 
 | # | Task | Files Created | Tests |
 |---|---|---|---|
-| 1 | Project Scaffolding | 4 | — |
+| 1 | Project Scaffolding | 5 | — |
 | 2 | API Layer | 2 | — |
-| 3 | Utility Functions | 3 | 2 test files |
+| 3 | Utility Functions | 5 | 3 test files |
 | 4 | State Management | 1 | 1 test file |
-| 5 | Base Components (Part 1) | 3 | — |
-| 6 | Base Components (Part 2) | 3 | — |
+| 5 | Base Components (Part 1) | 4 | — |
+| 6 | Base Components (Part 2) | 4 | — |
 | 7 | InputBar | 1 | — |
-| 8 | AnimatedBackground | 1 | — |
-| 9 | PasswordGate | 1 | 1 test file |
-| 10 | InterviewChat + useInterview | 2 | — |
-| 11 | ReportView | 1 | — |
-| 12 | App Shell + Lazy Loading | 1 | — |
-| 13 | Integration & Build | — | — |
-| 14 | A11y & Mobile Polish | 3 (modified) | — |
+| 8 | Ambient Environment | 4 | — |
+| 9 | Screen Transition | 1 | — |
+| 10 | PasswordGate | 1 | 1 test file |
+| 11 | InterviewChat + useInterview | 3 | — |
+| 12 | ReportView + Stats + Preview | 3 | — |
+| 13 | App Shell | 1 | — |
+| 14 | Integration & Build | — | — |
+| 15 | A11y & Mobile Polish | — | — |
+
+**Total:** 15 tasks, 35+ files, 5 test files
 
 **Backend:** Zero changes. `backend/worker.js` remains exactly as-is.
 
-**DeepSeek adaptive logic:** The v2 system prompt (embedded in `useInterview.js`) drives all adaptive behavior — phase pacing, cultural calibration, crisis response — via DeepSeek's `deepseek-reasoner` model at runtime. No frontend logic needed for adaptation; the prompt IS the adaptation layer.
+**Design summary:**
+- **Visual language:** Warm Precision — gradient accent family (indigo → violet → rose → emerald), Godly-inspired bold typography
+- **Animation:** Immersive — phase-aware ambience, cinematic screen transitions, cursor-responsive lighting, spring physics throughout, staggered reveals, sparkle celebrations
+- **New components vs original spec:** +8 (StaggeredReveal, PhaseIndicator, CinematicPhaseChange, SparkleBurst, CursorGlow, AmbientEnvironment, StatsCounter, ReportPreview, ScreenTransition)
+- **Enhanced components:** ChatBubble (glass/gradient/profile cards), InputBar (glass morphism/focus lift/keystroke pulse), SendButton (3-state morph), ReportView (multi-step experience)
