@@ -19,7 +19,6 @@ psych-profiler/
 ├── index.html                  # REPLACE: Vite entry point
 ├── package.json                # CREATE
 ├── vite.config.js              # CREATE
-├── tailwind.config.js          # CREATE (or postcss.config.js for Tailwind v4)
 ├── backend/                    # UNCHANGED
 │   ├── worker.js
 │   ├── wrangler.toml
@@ -55,8 +54,7 @@ psych-profiler/
     ├── formatContent.test.js
     ├── detectPhase.test.js
     ├── InterviewContext.test.jsx
-    ├── PasswordGate.test.jsx
-    └── InputBar.test.jsx
+    └── PasswordGate.test.jsx
 ```
 
 ---
@@ -125,9 +123,15 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: [],
+    setupFiles: ['./__tests__/setup.js'],
   },
 });
+```
+
+- [ ] **Step 2b: Create __tests__/setup.js**
+
+```javascript
+import '@testing-library/jest-dom/vitest';
 ```
 
 - [ ] **Step 3: Replace index.html (Vite entry)**
