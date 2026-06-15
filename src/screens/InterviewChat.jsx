@@ -69,7 +69,7 @@ export default function InterviewChat() {
 
   return (
     <div
-      className="flex flex-col h-[100dvh] max-w-[820px] mx-auto w-full relative"
+      className="flex flex-col h-screen h-[100dvh] max-w-[820px] mx-auto w-full relative"
       onMouseMove={cursorGlow.handleMouseMove}
       onMouseLeave={cursorGlow.handleMouseLeave}
     >
