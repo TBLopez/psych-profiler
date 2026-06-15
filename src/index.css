@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+  /* Canvas & surfaces */
+  --color-canvas: #FAFBFC;
+  --color-surface: #FFFFFF;
+  --color-surface-raised: #F3F4F6;
+  --color-surface-glass: rgba(255, 255, 255, 0.8);
+
+  /* Ink */
+  --color-ink: #1A1A2E;
+  --color-ink-secondary: #555555;
+  --color-ink-muted: #888888;
+
+  /* Accent family — indigo → violet → rose → emerald */
+  --color-accent-primary: #4F46E5;
+  --color-accent-primary-light: #6366F1;
+  --color-accent-deep: #7C3AED;
+  --color-accent-deep-light: #8B5CF6;
+  --color-accent-warm: #EC4899;
+  --color-accent-warm-light: #F472B6;
+  --color-accent-positive: #059669;
+  --color-accent-positive-light: #10B981;
+
+  /* Glow */
+  --color-accent-glow-primary: rgba(79, 70, 229, 0.08);
+  --color-accent-glow-warm: rgba(236, 72, 153, 0.05);
+
+  /* Semantic */
+  --color-success: #059669;
+  --color-danger: #DC2626;
+  --color-border: #E8EAF0;
+  --color-border-light: #F0F0F5;
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', SF Mono, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus rings */
+:focus-visible {
+  outline: 2px solid var(--color-accent-primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+
+/* Noise texture overlay — used by AmbientEnvironment */
+@keyframes noise {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -5%); }
+  20% { transform: translate(-10%, 5%); }
+  30% { transform: translate(5%, -10%); }
+  40% { transform: translate(-5%, 15%); }
+  50% { transform: translate(-10%, 5%); }
+  60% { transform: translate(15%, 0); }
+  70% { transform: translate(0, 10%); }
+  80% { transform: translate(-15%, 0); }
+  90% { transform: translate(10%, 5%); }
+}
+
+/* Phase-aware gradient keyframes */
+@keyframes phasePulse {
+  0%, 100% { opacity: 0.04; }
+  50% { opacity: 0.07; }
+}
