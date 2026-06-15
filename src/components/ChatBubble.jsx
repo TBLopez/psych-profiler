@@ -27,7 +27,7 @@ export default function ChatBubble({ role, content, isProfileDelivery }) {
 
   return (
     <motion.div
-      className={`flex gap-2 items-start mb-3 ${isUser ? 'flex-row-reverse' : ''}`}
+      className={`flex gap-2.5 items-start mb-4 ${isUser ? 'flex-row-reverse' : ''}`}
       initial={reduced ? { opacity: 1 } : { opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={spring}
@@ -35,13 +35,13 @@ export default function ChatBubble({ role, content, isProfileDelivery }) {
       {/* Body */}
       <div className={`flex-1 min-w-0 ${isUser ? 'flex flex-col items-end' : ''}`}>
         {/* Label — only show for non-user on first message, or always subtle */}
-        <div className={`text-[10px] font-medium mb-0.5 px-0.5 ${isUser ? 'text-accent-primary/40 text-right' : isSystem ? 'text-amber-500' : 'text-ink-muted'}`}>
+        <div className={`text-[11px] font-medium mb-1 px-0.5 ${isUser ? 'text-accent-primary/40 text-right' : isSystem ? 'text-amber-500' : 'text-ink-muted'}`}>
           {label}
         </div>
 
         {/* Content */}
         {isUser ? (
-          <div className="px-3.5 py-2 max-w-[85%] bg-accent-primary text-white rounded-2xl rounded-br-md">
+          <div className="px-4 py-2.5 max-w-[85%] bg-accent-primary text-white rounded-2xl rounded-br-md">
             <p className="text-[15px] leading-relaxed">{content}</p>
           </div>
         ) : isSystem ? (
@@ -62,7 +62,7 @@ export default function ChatBubble({ role, content, isProfileDelivery }) {
                 );
               }
               return (
-                <div key={i} className="text-[15px] leading-relaxed text-ink-secondary px-1"
+                <div key={i} className="text-[16px] leading-relaxed text-ink px-1"
                   dangerouslySetInnerHTML={{ __html: formatContent(section) }}
                 />
               );
@@ -70,7 +70,7 @@ export default function ChatBubble({ role, content, isProfileDelivery }) {
           </div>
         ) : (
           <div
-            className="text-[15px] leading-relaxed text-ink-secondary px-1 max-w-[95%]"
+            className="text-[16px] leading-relaxed text-ink px-1 max-w-[95%]"
             dangerouslySetInnerHTML={{ __html: bodyHtml }}
           />
         )}

@@ -47,7 +47,7 @@ export default function InputBar({ value, onChange, onSend, onEnd, disabled, sta
           placeholder="Type your response..."
           rows={1}
           disabled={disabled}
-          className="flex-1 resize-none bg-transparent border-none outline-none text-[15px] text-ink leading-relaxed placeholder:text-ink-muted py-2 min-h-[24px] max-h-[120px] font-sans"
+          className="flex-1 resize-none bg-transparent border-none outline-none text-[16px] text-ink leading-relaxed placeholder:text-ink-muted py-2 min-h-[24px] max-h-[120px] font-sans"
           aria-label="Your response"
         />
         <SendButton disabled={disabled || !value.trim()} status={status} onClick={handleSend} />
