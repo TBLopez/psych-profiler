@@ -45,7 +45,7 @@ Password-protected, AI-powered psychological profiling interview tool. Share a l
                     ┌──────────────────────────────────────────┐
                     │          DeepSeek API                     │
                     │  (deepseek-reasoner model)                │
-                    │  Your key: sk-11aa46e1c8...               │
+                    │  Your key: ...               │
                     └──────────────────────────────────────────┘
 ```
 
@@ -112,7 +112,7 @@ The frontend is a single HTML file (`index.html`) containing:
 
 ### `/api/verify`
 ```json
-Request:  {"password": "ForFarook2026!!"}
+Request:  {"password": ""}
 Response: {"valid": true}           // 200
           {"valid": false}          // 401
 ```
@@ -242,7 +242,7 @@ git push -u origin main
 
 ## Password
 
-Current: `ForFarook2026!!`
+Current: 
 Change with: `npx wrangler secret put PASSWORD`
 
 ## The System Prompt
