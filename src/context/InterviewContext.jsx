@@ -1,11 +1,46 @@
-import { createContext, useContext, useReducer } from 'react';
+import { createContext, useContext, useReducer, useEffect } from 'react';
 
 const InterviewContext = createContext(null);
 const InterviewDispatch = createContext(null);
 
+const SESSION_KEY = 'psych_profiler_session';
+const SESSION_TTL = 30 * 60 * 1000; // 30 minutes
+
+function loadSession() {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const session = JSON.parse(raw);
+    if (session.expires && Date.now() > session.expires) {
+      sessionStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+    return session;
+  } catch {
+    return null;
+  }
+}
+
+function saveSession(password) {
+  try {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+      password,
+      expires: Date.now() + SESSION_TTL,
+    }));
+  } catch { /* storage full or unavailable */ }
+}
+
+function clearSession() {
+  try {
+    sessionStorage.removeItem(SESSION_KEY);
+  } catch { /* ignore */ }
+}
+
+const savedSession = loadSession();
+
 const initialState = {
-  screen: 'gate',        // 'gate' | 'interview' | 'report'
-  password: '',
+  screen: savedSession ? 'interview' : 'gate',
+  password: savedSession?.password || '',
   phase: 1,
   questionCount: 0,
   messages: [],
@@ -23,6 +58,7 @@ function reducer(state, action) {
   switch (action.type) {
     case 'UNLOCK': {
       const { password } = action;
+      saveSession(password);
       return { ...state, password, screen: 'interview', error: null };
     }
 
@@ -75,7 +111,8 @@ function reducer(state, action) {
     }
 
     case 'RESET': {
-      return { ...initialState };
+      clearSession();
+      return { ...initialState, screen: 'gate', password: '', messages: [], status: 'idle', reportMarkdown: null, error: null };
     }
 
     default:
@@ -86,6 +123,13 @@ function reducer(state, action) {
 export function InterviewProvider({ children }) {
   const [{ screen, password, phase, questionCount, messages, status, reportMarkdown, error, stats }, dispatch] =
     useReducer(reducer, initialState);
+
+  // If there's a saved session, mark status as idle so InterviewChat can start
+  useEffect(() => {
+    if (savedSession && screen === 'interview') {
+      // Session restored — InterviewChat will start automatically on mount
+    }
+  }, []);
 
   return (
     <InterviewContext.Provider value={{ screen, password, phase, questionCount, messages, status, reportMarkdown, error, stats }}>

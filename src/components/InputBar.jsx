@@ -44,9 +44,9 @@ export default function InputBar({ value, onChange, onSend, onEnd, disabled, sta
   const isProcessing = status === 'processing';
 
   return (
-    <div className="border-t border-border-light bg-surface/90 backdrop-blur-md px-3 sm:px-4 md:px-5 py-3 pb-[calc(12px+env(safe-area-inset-bottom,0px))] shrink-0">
+    <div className="border-t border-border-light bg-surface/90 backdrop-blur-md px-2 sm:px-4 md:px-5 py-2.5 sm:py-3 pb-[calc(10px+env(safe-area-inset-bottom,0px))] shrink-0">
       <motion.div
-        className={`flex gap-2 items-end bg-white/90 backdrop-blur-sm border rounded-2xl px-4 py-2.5 transition-colors
+        className={`flex gap-2 items-end bg-white/90 backdrop-blur-sm border rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 transition-colors
           ${focused ? 'border-accent-primary shadow-[0_0_0_3px_var(--color-accent-glow-primary)]' : 'border-border'}`}
         animate={{
           y: focused ? -2 : 0,
@@ -64,7 +64,7 @@ export default function InputBar({ value, onChange, onSend, onEnd, disabled, sta
           placeholder="Type your response..."
           rows={1}
           disabled={disabled}
-          className="flex-1 resize-none bg-transparent border-none outline-none text-[15px] text-ink leading-relaxed placeholder:text-ink-muted py-1.5 min-h-[24px] max-h-[120px] font-sans"
+          className="flex-1 resize-none bg-transparent border-none outline-none text-[14px] sm:text-[15px] text-ink leading-relaxed placeholder:text-ink-muted py-1.5 min-h-[24px] max-h-[120px] font-sans"
           aria-label="Your response"
         />
         <SendButton disabled={disabled || !value.trim()} status={status} onClick={handleSend} />

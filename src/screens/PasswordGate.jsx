@@ -34,7 +34,7 @@ export default function PasswordGate() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-canvas">
+    <div className="min-h-screen min-h-dvh flex items-center justify-center p-4 sm:p-6 bg-canvas">
       <motion.div
         className="max-w-[380px] w-full text-center"
         initial={reduced ? {} : { opacity: 0, scale: 0.92 }}
@@ -43,7 +43,7 @@ export default function PasswordGate() {
       >
         {/* Brand mark */}
         <motion.div
-          className="w-14 h-14 rounded-2xl mx-auto mb-6 flex items-center justify-center text-white text-2xl shadow-[0_8px_32px_rgba(79,70,229,0.15)]"
+          className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl mx-auto mb-5 sm:mb-6 flex items-center justify-center text-white text-xl sm:text-2xl shadow-[0_8px_32px_rgba(79,70,229,0.15)]"
           style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed, #ec4899)' }}
           animate={reduced ? {} : { scale: [1, 1.05, 1] }}
           transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
@@ -51,10 +51,10 @@ export default function PasswordGate() {
           ◆
         </motion.div>
 
-        <h1 className="text-[32px] font-[200] tracking-[-1px] text-ink mb-2 leading-tight">
+        <h1 className="text-[26px] sm:text-[32px] font-[200] tracking-[-1px] text-ink mb-2 leading-tight">
           Psychological<br />Profile
         </h1>
-        <p className="text-[14px] text-ink-secondary leading-relaxed mb-8 max-w-[300px] mx-auto">
+        <p className="text-[13px] sm:text-[14px] text-ink-secondary leading-relaxed mb-6 sm:mb-8 max-w-[300px] mx-auto px-2">
           A confidential behavioral interview. Enter the access code you received to begin.
         </p>
 

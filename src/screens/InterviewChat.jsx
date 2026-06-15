@@ -69,19 +69,19 @@ export default function InterviewChat() {
 
   return (
     <div
-      className="flex flex-col h-screen max-w-full md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto w-full relative"
+      className="flex flex-col h-dvh h-screen max-w-full md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto w-full relative"
       onMouseMove={cursorGlow.handleMouseMove}
       onMouseLeave={cursorGlow.handleMouseLeave}
     >
       {/* Header */}
-      <header className="flex items-center justify-between px-4 sm:px-5 md:px-6 py-3.5 border-b border-border-light bg-surface shrink-0 min-h-[56px]">
-        <div className="flex items-center gap-2.5 text-sm font-medium text-ink">
+      <header className="flex items-center justify-between px-3 sm:px-5 md:px-6 py-3 border-b border-border-light bg-surface shrink-0 min-h-[52px] gap-2">
+        <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-ink min-w-0">
           <motion.span
-            className="w-2 h-2 rounded-full bg-accent-primary opacity-70"
+            className="w-2 h-2 rounded-full bg-accent-primary opacity-70 shrink-0"
             animate={{ opacity: isProcessing ? [0.4, 1, 0.4] : 0.7 }}
             transition={{ duration: 2, repeat: isProcessing ? Infinity : 0 }}
           />
-          Psychological Profile
+          <span className="truncate">Psychological Profile</span>
         </div>
         <PhaseIndicator phase={phase} questionCount={questionCount} />
       </header>

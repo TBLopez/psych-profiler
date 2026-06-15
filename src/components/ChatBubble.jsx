@@ -35,13 +35,13 @@ export default function ChatBubble({ role, content, isProfileDelivery }) {
 
   return (
     <motion.div
-      className={`flex gap-3 items-start mb-5 ${isUser ? 'flex-row-reverse' : ''}`}
+      className={`flex gap-2 sm:gap-3 items-start mb-4 sm:mb-5 ${isUser ? 'flex-row-reverse' : ''}`}
       initial={reduced ? { opacity: 1 } : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={spring}
     >
       {/* Avatar */}
-      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 mt-0.5 ${avatarClasses}`}>
+      <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-semibold shrink-0 mt-0.5 ${avatarClasses}`}>
         {avatar}
       </div>
 
@@ -55,7 +55,7 @@ export default function ChatBubble({ role, content, isProfileDelivery }) {
         {/* Content */}
         {isUser ? (
           <div className="px-4 py-2.5 max-w-[85%] sm:max-w-[75%] md:max-w-[65%] lg:max-w-[60%] bg-gradient-to-br from-accent-primary to-accent-deep text-white rounded-2xl rounded-br-sm shadow-[0_2px_8px_rgba(79,70,229,0.15)]">
-            <p className="text-[15px] leading-relaxed">{content}</p>
+            <p className="text-[14px] sm:text-[15px] leading-relaxed">{content}</p>
           </div>
         ) : isSystem ? (
           <div className="text-[13px] leading-relaxed text-ink-muted italic px-3 py-1.5 bg-amber-50/50 rounded-lg border border-amber-200/50 max-w-[90%] sm:max-w-[85%] md:max-w-[75%]">
@@ -75,7 +75,7 @@ export default function ChatBubble({ role, content, isProfileDelivery }) {
                 );
               }
               return (
-                <div key={i} className="text-[15px] leading-relaxed text-ink-secondary bg-white/90 backdrop-blur-sm border border-border rounded-xl px-4 py-3 shadow-sm"
+                <div key={i} className="text-[14px] sm:text-[15px] leading-relaxed text-ink-secondary bg-white/90 backdrop-blur-sm border border-border rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-sm"
                   dangerouslySetInnerHTML={{ __html: formatContent(section) }}
                 />
               );
@@ -83,7 +83,7 @@ export default function ChatBubble({ role, content, isProfileDelivery }) {
           </div>
         ) : (
           <div
-            className="text-[15px] leading-relaxed text-ink-secondary bg-white/90 backdrop-blur-sm border border-border rounded-xl px-4 py-3 shadow-sm max-w-[90%] sm:max-w-[85%] md:max-w-[75%] lg:max-w-[70%]"
+            className="text-[14px] sm:text-[15px] leading-relaxed text-ink-secondary bg-white/90 backdrop-blur-sm border border-border rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-sm max-w-[90%] sm:max-w-[85%] md:max-w-[75%] lg:max-w-[70%]"
             dangerouslySetInnerHTML={{ __html: bodyHtml }}
           />
         )}
