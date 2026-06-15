@@ -45,7 +45,8 @@ async function handleChat(request, env, corsHeaders) {
   const { messages, system } = body;
   if (!messages || !Array.isArray(messages)) return new Response(JSON.stringify({ error: 'Invalid messages format' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
-  const model = env.DEEPSEEK_MODEL || 'deepseek-reasoner';
+  // Use fast model for real-time conversation
+  const model = 'deepseek-chat';
   const deepseekBody = {
     model,
     messages: system ? [{ role: 'system', content: system }, ...messages] : messages,
@@ -201,7 +202,8 @@ Write the COMPLETE report in markdown format. Use clinical language throughout. 
 Here is the conversation:
 ${JSON.stringify(conversation, null, 2)}`;
 
-  const model = env.DEEPSEEK_MODEL || 'deepseek-reasoner';
+  // Use reasoning model for deep report analysis
+  const model = 'deepseek-reasoner';
   const deepseekBody = {
     model,
     messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: expandPrompt }],

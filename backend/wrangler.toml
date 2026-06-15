@@ -2,8 +2,7 @@ name = "psych-profiler"
 main = "worker.js"
 compatibility_date = "2024-12-01"
 
-[vars]
-DEEPSEEK_MODEL = "deepseek-reasoner"
+# Chat uses deepseek-chat (fast), Report uses deepseek-reasoner (deep analysis)
 
 [env.production]
 DEEPSEEK_MODEL = "deepseek-reasoner"
